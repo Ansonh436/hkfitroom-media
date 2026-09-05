@@ -27,10 +27,13 @@
   .hud .lbl { font-size:9px; color:var(--muted); }
   .hud .val { font-size:16px; font-weight:800; }
   #scoreVal{color:var(--gold);} #comboVal{color:var(--accent);} #bestVal{color:var(--green);}
-  #waveVal{color:var(--blue);} #lvlVal{color:#c084fc;}
+  #modeVal{color:var(--blue);} #lvlVal{color:#c084fc;}
   .hpbar { position:absolute; top:8px; left:50%; transform:translateX(-50%); width:130px; height:18px; background:rgba(255,255,255,.12); border-radius:9px; overflow:hidden; z-index:5; pointer-events:none; }
   #hpFill { position:absolute; left:0; top:0; bottom:0; width:100%; background:var(--green); border-radius:9px; transition:width .15s; }
   #hpText { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; color:#fff; text-shadow:0 0 3px rgba(0,0,0,.9); }
+  .bossbar { position:absolute; top:30px; left:50%; transform:translateX(-50%); width:230px; height:16px; background:rgba(0,0,0,.55); border:1.5px solid var(--accent); border-radius:8px; overflow:hidden; z-index:5; pointer-events:none; display:none; }
+  #bossFill { position:absolute; left:0; top:0; bottom:0; width:100%; background:linear-gradient(90deg,#f43f5e,#fb7185); border-radius:6px; transition:width .12s; }
+  #bossText { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:#fff; text-shadow:0 0 3px rgba(0,0,0,.9); }
   .pausebtn { position:absolute; top:54px; right:10px; width:40px; height:40px; border-radius:11px; background:rgba(15,17,25,.72); border:1px solid var(--border); color:#fff; font-size:18px; z-index:6; touch-action:none; pointer-events:auto; }
   .pausebtn:active { background:rgba(255,255,255,.15); }
   .joy { position:absolute; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,.05); border:1.5px solid rgba(255,255,255,.18); z-index:6; touch-action:none; pointer-events:auto; }
@@ -40,13 +43,13 @@
   .knob { position:absolute; width:48px; height:48px; border-radius:50%; background:rgba(255,255,255,.22); left:36px; top:36px; pointer-events:none; }
   .dashbtn { position:absolute; right:16px; bottom:115px; width:56px; height:56px; border-radius:50%; background: conic-gradient(#38bdf8 calc(var(--cd,0)*1%), rgba(56,189,248,.15) 0); border:1.5px solid rgba(56,189,248,.5); color:#7dd3fc; font-size:12px; font-weight:800; z-index:6; touch-action:none; pointer-events:auto; display:flex; align-items:center; justify-content:center; }
   .dashbtn:active { transform:scale(.92); }
-  .overlay { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center; background:rgba(8,10,16,.94); padding:20px; }
-  .overlay h1 { font-size:28px; letter-spacing:2px; }
-  .overlay .sub { color:var(--muted); font-size:13px; line-height:1.7; }
+  .overlay { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; background:rgba(8,10,16,.94); padding:20px; }
+  .overlay h1 { font-size:26px; letter-spacing:2px; }
+  .overlay .sub { color:var(--muted); font-size:12px; line-height:1.7; }
   .overlay .btn { background:var(--accent); color:#fff; border:none; border-radius:12px; padding:13px 30px; font-size:16px; font-weight:800; letter-spacing:1px; cursor:pointer; touch-action:manipulation; }
   .overlay .btn:active { transform:scale(.95); }
-  .diff { display:flex; gap:8px; margin-top:2px; }
-  .diff .dbtn { background:var(--panel); border:1.5px solid var(--border); border-radius:10px; padding:8px 16px; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; touch-action:manipulation; }
+  .diff { display:flex; gap:6px; margin-top:2px; flex-wrap:wrap; justify-content:center; }
+  .diff .dbtn { background:var(--panel); border:1.5px solid var(--border); border-radius:10px; padding:8px 13px; font-size:12px; font-weight:700; color:var(--muted); cursor:pointer; touch-action:manipulation; }
   .diff .dbtn.sel { border-color:var(--accent); color:#fff; background:rgba(244,63,94,.18); }
   .gear { background:var(--panel) !important; border:1.5px solid var(--border) !important; color:var(--muted) !important; font-size:14px !important; }
   #settings { position:absolute; inset:0; z-index:12; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; background:rgba(8,10,16,.96); padding:16px; }
@@ -60,6 +63,13 @@
   .upgcard:active { border-color:var(--gold); }
   .upgcard .n { color:var(--gold); font-size:14px; font-weight:800; }
   .upgcard .d { color:var(--muted); font-size:12px; line-height:1.5; }
+  #bestiary { position:absolute; inset:0; z-index:13; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; background:rgba(8,10,16,.97); padding:16px; }
+  #bestiary h2 { font-size:20px; letter-spacing:1px; }
+  #bestiary .sub { color:var(--muted); font-size:11px; }
+  #grid { display:grid; grid-template-columns:repeat(10,1fr); gap:5px; width:100%; max-width:330px; }
+  .cell { aspect-ratio:1; border-radius:7px; background:var(--panel); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:var(--muted); }
+  .cell.unlocked { border-color:var(--gold); color:var(--gold); }
+  .cell.hell { border-color:#a855f7; color:#c084fc; }
   .hidden { display:none !important; }
   .warn { color:var(--accent); font-size:13px; font-weight:700; text-align:center; min-height:18px; }
 </style>
@@ -73,28 +83,30 @@
         <div class="box"><div class="lbl">COMBO</div><div class="val" id="comboVal">×1</div></div>
       </div>
       <div class="col" style="align-items:flex-end;">
-        <div class="box"><div class="lbl">關卡</div><div class="val" id="lvlVal">1</div></div>
-        <div class="box"><div class="lbl">波</div><div class="val" id="waveVal">1</div></div>
+        <div class="box"><div class="lbl">關卡</div><div class="val" id="lvlVal">1/20</div></div>
+        <div class="box"><div class="lbl">模式</div><div class="val" id="modeVal">簡單</div></div>
         <div class="box"><div class="lbl">最高</div><div class="val" id="bestVal">0</div></div>
       </div>
     </div>
     <div class="hpbar"><div id="hpFill"></div><div id="hpText">100</div></div>
+    <div class="bossbar" id="bossbar"><div id="bossFill"></div><div id="bossText">BOSS</div></div>
     <button class="pausebtn" id="pauseBtn" type="button">⏸</button>
     <div class="joy" id="joyL"><div class="knob" id="knobL"></div></div>
     <div class="joy" id="joyR"><div class="knob" id="knobR"></div></div>
     <button class="dashbtn" id="dashBtn" type="button">DASH</button>
     <div class="overlay" id="overlay">
       <h1>🔫 彈雨獵人</h1>
-      <div class="sub">左搖桿移動 · DASH 閃避<br>🔫 自動射擊已開（設定可關→手動瞄準）<br>💥 暴擊 3x · 連鎖 COMBO<br>🏆 過晒 5 關就勝利<br>⚠️ 開始後不能更換橫屏／豎屏</div>
+      <div class="sub">左搖桿移動 · DASH 閃避<br>🔫 自動射擊已開（設定可關→手動瞄準）<br>💥 暴擊 3x · 連鎖 COMBO<br>👹 每 5 關一隻 BOSS<br>📖 打贏 BOSS 解鎖收藏格</div>
       <div class="diff" id="diffSel">
-        <button class="dbtn sel" data-d="easy" type="button">簡單</button>
-        <button class="dbtn" data-d="normal" type="button">普通</button>
-        <button class="dbtn" data-d="hard" type="button">困難</button>
+        <button class="dbtn sel" data-d="easy" type="button">簡單·20關</button>
+        <button class="dbtn" data-d="normal" type="button">普通·60關</button>
+        <button class="dbtn" data-d="hard" type="button">困難·100關</button>
+        <button class="dbtn" data-d="hell" id="hellBtn" type="button" style="display:none">👹地獄·50關</button>
       </div>
       <button class="btn" id="startBtn" type="button">開始</button>
-      <button class="btn" id="endlessBtn" type="button" style="display:none;background:#fbbf24;color:#111">繼續無盡</button>
       <button class="btn gear" id="gearBtn" type="button">⚙️ 設定</button>
       <button class="btn gear" id="tutorBtn" type="button">❓ 教學</button>
+      <button class="btn gear" id="bestiaryBtn" type="button">📖 收藏格</button>
       <div class="sub">📲 加至主畫面體驗更佳！</div>
     </div>
     <div id="settings" class="hidden">
@@ -103,6 +115,12 @@
       <div class="setrow"><span>🔫 自動連射</span><button class="tgl" id="tglAutoFire" type="button">開</button></div>
       <div class="sub" style="color:var(--muted);font-size:11px;max-width:270px;line-height:1.6;">開＝自動追蹤射擊（射速略慢）；關＝右搖桿手動瞄準（射速最快）</div>
       <button class="btn" id="closeSettings" type="button">完成</button>
+    </div>
+    <div id="bestiary" class="hidden">
+      <h2>📖 收藏格</h2>
+      <div class="sub" id="bestiaryInfo">打贏 BOSS 開鎖對應格</div>
+      <div id="grid"></div>
+      <button class="btn" id="closeBestiary" type="button">完成</button>
     </div>
     <div id="upg" class="hidden"></div>
   </div>
@@ -119,13 +137,16 @@
   const comboVal = document.getElementById('comboVal');
   const bestVal = document.getElementById('bestVal');
   const lvlVal = document.getElementById('lvlVal');
-  const waveVal = document.getElementById('waveVal');
+  const modeVal = document.getElementById('modeVal');
   const hpFill = document.getElementById('hpFill');
   const joyL = document.getElementById('joyL'), knobL = document.getElementById('knobL');
   const joyR = document.getElementById('joyR'), knobR = document.getElementById('knobR');
   const dashBtn = document.getElementById('dashBtn');
   const pauseBtn = document.getElementById('pauseBtn');
   const hpText = document.getElementById('hpText');
+  const bossbar = document.getElementById('bossbar');
+  const bossFill = document.getElementById('bossFill');
+  const bossText = document.getElementById('bossText');
 
   let W = 400, H = 700, orientationLocked = false;
   function fitViewport(){
@@ -134,8 +155,6 @@
     wrap.style.transformOrigin = 'center center';
   }
   function layoutControls(isLand){
-    // 自動連射開：收埋右搖桿，DASH 放右下角（單手）
-    // 自動連射關：顯示右搖桿，DASH 搬開唔好重疊
     if (settings.autoFire){
       joyR.style.display = 'none';
       if (isLand){ dashBtn.style.right='120px'; dashBtn.style.bottom='24px'; }
@@ -160,13 +179,22 @@
   // ---------- localStorage ----------
   function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
   function lsSet(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
-  // 設定（玩家可改）
   let settings = { sound:true, autoFire:true };
   function saveSettings(){ try { localStorage.setItem('bulletrain_settings', JSON.stringify(settings)); } catch(e){} }
   (function(){ try { const s=JSON.parse(localStorage.getItem('bulletrain_settings')||'{}'); settings=Object.assign(settings,s); } catch(e){} })();
   applyOrientation();
   function lsNum(k){ const v=lsGet(k); return v?parseInt(v,10)||0:0; }
   let best = lsNum('bulletrain_best'); bestVal.textContent = best;
+
+  // 收藏格 + 地獄解鎖
+  function getBestiary(){ try { return JSON.parse(localStorage.getItem('bulletrain_bestiary')||'[]'); } catch(e){ return []; } }
+  function saveBestiary(arr){ try { localStorage.setItem('bulletrain_bestiary', JSON.stringify(arr)); } catch(e){} }
+  function getCleared(){ try { return JSON.parse(localStorage.getItem('bulletrain_cleared')||'{}'); } catch(e){ return {}; } }
+  function saveCleared(o){ try { localStorage.setItem('bulletrain_cleared', JSON.stringify(o)); } catch(e){} }
+  function hellUnlocked(){
+    const c = getCleared();
+    return !!(c.easy && c.normal && c.hard);
+  }
 
   // ---------- 音效（WebAudio 合成） ----------
   let AC = null;
@@ -190,14 +218,20 @@
   function sKill(){ beep(220,0.12,'sawtooth',0.08); }
   function sHurt(){ beep(110,0.2,'sawtooth',0.12); }
   function sWave(){ beep(520,0.15,'sine',0.1); }
+  function sBoss(){ beep(196,0.5,'sawtooth',0.14); beep(147,0.6,'sawtooth',0.14); beep(98,0.7,'sawtooth',0.14); }
 
   // ---------- 狀態 ----------
-  const DIFF = { easy:{name:'簡單',spd:1.3,hpDmg:6,spawn:1.0,iframe:1000}, normal:{name:'普通',spd:2.2,hpDmg:10,spawn:1.35,iframe:800}, hard:{name:'困難',spd:3.6,hpDmg:22,spawn:2.0,iframe:500} };
-  let diff = 'easy';
-  let running=false, over=false, paused=false, endless=false;
+  const MODES = {
+    easy:   { name:'簡單', levels:20,  spd:1.3, hpDmg:6,  iframe:1000, spawn:1.0, col:'#4ade80' },
+    normal: { name:'普通', levels:60,  spd:2.2, hpDmg:10, iframe:800,  spawn:1.35, col:'#fbbf24' },
+    hard:   { name:'困難', levels:100, spd:3.6, hpDmg:22, iframe:500,  spawn:2.0, col:'#f43f5e' },
+    hell:   { name:'地獄', levels:50,  spd:4.0, hpDmg:26, iframe:450,  spawn:2.3, col:'#a855f7' },
+  };
+  let mode = 'easy';
+  let running=false, over=false, paused=false;
   let player, bullets, enemies, particles, texts;
-  let score, combo, comboTimer, hp, level, wave;
-  let waveTimer, spawnTimer, waveEnemiesLeft, firstWave=false;
+  let score, combo, comboTimer, hp, level;
+  let spawnTimer, enemiesLeft, bossActive=false, bossObj=null;
   let hitstopUntil=0, slowmoUntil=0, shakeUntil=0, shakeMag=0, flashUntil=0;
   let moveVec={x:0,y:0}, aimVec={x:0,y:0};
   let lastShotAt=0, dashCd=0, dashCdDur=0, dashUntil=0, dashVec={x:0,y:0}, lastGrazeAt=0;
@@ -205,18 +239,62 @@
   let upgrades = { fireRate:0, dmg:0, spd:0, maxhp:0, bulletSpeed:0, pierce:0, crit:0, dashCd:0 };
   let lastT=0;
 
+  // ---------- BOSS 定義（程序化生成 50 隻唔同樣） ----------
+  function hash(n){ const x = Math.sin(n*127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+  const BOSS_ADJ = ['彈幕','追蹤','衝撞','召喚','螺旋','鐵壁','分裂','狂暴','虛空','烈焰','寒冰','雷霆','暗影','神聖','腐化','疾風'];
+  const BOSS_NOUN = ['領主','獵手','狂獸','軍團','暴風','堡壘','巢穴','魔王','巨像','巨龍','鳳凰','泰坦','幽靈','主教','樹妖','劍聖'];
+  const BOSS_COLORS = ['#ef4444','#f97316','#facc15','#22c55e','#06b6d4','#3b82f6','#a855f7','#ec4899','#f43f5e','#14b8a6','#38bdf8','#fb7185','#8b5cf6','#f59e0b','#10b981','#6366f1'];
+  function bossName(i){
+    if (i >= 46) return '斷層魔王 ' + ['壹','貳','叁','肆','伍'][i-46];
+    if (i >= 37) return '深淵 ' + BOSS_ADJ[Math.floor(hash(i*3.3)*16)] + BOSS_NOUN[Math.floor(hash(i*7.7)*16)];
+    return BOSS_ADJ[Math.floor(hash(i*7)*16)] + BOSS_NOUN[Math.floor(hash(i*5)*16)] + ' #'+i;
+  }
+  function bossSkills(i){
+    const all = ['fan','ring','homing','charge','spawn','spiral'];
+    const s = [];
+    const n = i >= 46 ? 4 : i >= 37 ? 3 : (1 + Math.floor(hash(i*1.3)*2));
+    // 用 hash 揀 n 個唔同技能
+    const pool = all.slice();
+    for (let k=0;k<n && pool.length;k++){
+      const idx = Math.floor(hash(i*11.7+k*13.1)*pool.length);
+      s.push(pool.splice(idx,1)[0]);
+    }
+    return s;
+  }
+  function bossMaxHp(i){ return Math.round(28 + i*8 + i*i*0.75); }
+  function makeBoss(index){
+    return {
+      isBoss:true, bossIndex:index,
+      x:W/2, y:70, r:30 + (index%3)*6, hp:bossMaxHp(index), maxHp:bossMaxHp(index),
+      speed:0.7 + index*0.03, dir:1,
+      color:BOSS_COLORS[Math.floor(hash(index*2.9)*BOSS_COLORS.length)],
+      name:bossName(index), skills:bossSkills(index),
+      skillCd:1200, skillInterval:Math.max(650, 1800-index*18),
+      spiralAng:0, charging:0, chargeAng:0,
+    };
+  }
+  function bossIndexFor(){
+    if (mode==='hell') return level;
+    if (mode==='easy') return level/5;
+    if (mode==='normal') return 4 + level/5;
+    return 16 + level/5;   // hard
+  }
+  function isBossLevel(){ return mode==='hell' ? true : (level % 5 === 0); }
+
   function resetGame(){
     player = { x:W/2, y:H-140, r:13, hp:100, maxHp:100 };
     hp = player.maxHp;
     bullets=[]; enemies=[]; particles=[]; texts=[];
-    score=0; combo=0; comboTimer=0; level=1; wave=1;
-    waveTimer=0; spawnTimer=0; waveEnemiesLeft=0;
+    score=0; combo=0; comboTimer=0; level=1;
+    spawnTimer=0; enemiesLeft=0; bossActive=false; bossObj=null;
     hitstopUntil=0; slowmoUntil=0; shakeUntil=0; shakeMag=0; flashUntil=0;
-    moveVec={x:0,y:0}; aimVec={x:0,y:0}; endless=false;
+    moveVec={x:0,y:0}; aimVec={x:0,y:0};
     lastShotAt=0; dashCd=0; dashCdDur=0; dashUntil=0; dashVec={x:0,y:0}; iframeUntil=0; lowHpWarned=false;
     upgrades = { fireRate:0, dmg:0, spd:0, maxhp:0, bulletSpeed:0, pierce:0, crit:0, dashCd:0 };
-    scoreVal.textContent='0'; comboVal.textContent='×1'; lvlVal.textContent='1'; waveVal.textContent='1';
+    scoreVal.textContent='0'; comboVal.textContent='×1';
+    lvlVal.textContent='1/'+MODES[mode].levels; modeVal.textContent=MODES[mode].name;
     hpFill.style.width='100%'; hpText.textContent=hp+'/'+player.maxHp;
+    bossbar.style.display='none';
   }
 
   function showTutorial(){
@@ -225,6 +303,7 @@
       {t:2200, s:(settings.autoFire ? '🔫 自動射擊已開，專心移動' : '🎯 右搖桿瞄準開火')},
       {t:4000, s:'💨 DASH 閃避'},
       {t:5800, s:'💥 暴擊：每槍 8% 機率 3x 傷害'},
+      {t:7600, s:'👹 每 5 關一隻 BOSS'},
     ];
     tuts.forEach(function(t){ setTimeout(function(){ if(running && !over) addText(W/2, H*0.45, t.s, '#fbbf24', 18); }, t.t); });
   }
@@ -233,44 +312,37 @@
     orientationLocked = true;
     resetGame();
     over=false; running=true; paused=false;
-    document.getElementById('endlessBtn').style.display='none';
     overlay.classList.add('hidden'); upg.classList.add('hidden');
-    startWave();
+    startLevel();
     lastT=performance.now();
     if (!lsGet('bulletrain_tutored')){ lsSet('bulletrain_tutored','1'); showTutorial(); }
   }
 
-  // ---------- 關卡 / 波次 ----------
-  function startWave(){
-    firstWave = (level===1 && wave===1);
-    waveEnemiesLeft = firstWave ? 3 : (3 + wave*2 + level*2);
-    if (level===1 && wave===2) waveEnemiesLeft = 5;   // 第二波平滑過渡
-    spawnTimer=0;
-    sWave();
-    addText(W/2, H*0.35, '第 '+level+' 關 · 第 '+wave+' 波', '#38bdf8', 28);
-    waveVal.textContent=wave;
-  }
-  function waveCleared(){
-    if (wave >= 3) {
-      if (endless) {
-        // 無盡：波次無限遞增，難度持續上升，唔再彈勝利
-        wave=1; level++; lvlVal.textContent=level;
-      } else {
-        const hpRatio = hp/player.maxHp;
-        let rank, bonus;
-        if (hpRatio >= 0.99){ rank='S'; bonus=200; }
-        else if (hpRatio>=0.85){ rank='A'; bonus=100; }
-        else if (hpRatio>=0.6){ rank='B'; bonus=50; }
-        else { rank='C'; bonus=0; }
-        score += bonus;
-        scoreVal.textContent = score;
-        addText(W/2, H*0.42, '評價 '+rank+(bonus>0?' +'+bonus:''), '#fbbf24', 32);
-        level++; wave=1; lvlVal.textContent=level;
-        if (level > 5) { win(); return; }
-      }
+  // ---------- 關卡系統 ----------
+  function startLevel(){
+    if (isBossLevel()){
+      spawnBoss();
+    } else {
+      enemiesLeft = Math.min(18, 4 + Math.floor(level*1.2));
+      spawnTimer = 0;
+      sWave();
+      addText(W/2, H*0.35, '第 '+level+' 關', '#38bdf8', 28);
     }
-    else { wave++; }
-    // 升級三選一
+    lvlVal.textContent = level+'/'+MODES[mode].levels;
+  }
+  function spawnBoss(){
+    const idx = bossIndexFor();
+    bossObj = makeBoss(idx);
+    bossActive = true;
+    enemies.push(bossObj);
+    bossbar.style.display='block';
+    bossText.textContent = bossObj.name;
+    bossFill.style.width='100%';
+    sBoss();
+    addText(W/2, H*0.4, '👹 '+bossObj.name, '#f43f5e', 24);
+    addText(W/2, H*0.46, 'BOSS 戰！', '#fb7185', 18);
+  }
+  function levelCleared(){
     showUpgrade();
   }
   function showUpgrade(){
@@ -314,20 +386,27 @@
     else { upgrades[k] = (upgrades[k]||0)+1; }
     upg.classList.add('hidden');
     running=true; paused=false;
-    startWave();
+    level++;
+    if (level > MODES[mode].levels){ win(); }
+    else { startLevel(); }
   }
 
   // ---------- 敵人 ----------
   function spawnEnemy(){
-    const side = firstWave ? 0 : Math.floor(Math.random()*3);
+    const side = Math.floor(Math.random()*3);
     let x,y;
     if(side===0){ x=Math.random()*W; y=-22; } else if(side===1){ x=-22; y=Math.random()*(H*0.45); } else { x=W+22; y=Math.random()*(H*0.45); }
-    const d=DIFF[diff];
+    const d=MODES[mode];
     const type = pickType(level);
-    let hp = type.hp + (diff==='hard' ? 1 : 0);
+    let hp = type.hp + (mode==='hard'||mode==='hell' ? 1 : 0);
     let e = { x, y, r:15, headR:7, hp, speed:type.speed*d.spd, type:type.name, color:type.color, headColor:type.headColor, split:type.split, shoot:type.shoot, shootCd:0 };
     enemies.push(e);
-    waveEnemiesLeft--;
+    enemiesLeft--;
+  }
+  function spawnMinion(boss){
+    const type = pickType(level);
+    const d = MODES[mode];
+    enemies.push({ x:boss.x+(Math.random()-0.5)*50, y:boss.y+34, r:12, headR:6, hp:type.hp, speed:type.speed*d.spd, type:type.name, color:type.color, headColor:type.headColor, split:false, shoot:false, minion:true });
   }
   function pickType(lv){
     const r=Math.random();
@@ -342,10 +421,8 @@
     if (Date.now()<hitstopUntil) return;
     let dx, dy;
     if (aimVec.x!==0 || aimVec.y!==0){
-      // 右搖桿瞄準：跟拖拽方向
       const l=Math.hypot(aimVec.x,aimVec.y)||1; dx=aimVec.x/l; dy=aimVec.y/l;
     } else {
-      // 自動追蹤最近敵人（非遠程彈）
       let target=null, bd=1e9;
       for (const e of enemies){
         if (e.isProj) continue;
@@ -359,7 +436,6 @@
     const bs = 7 + upgrades.bulletSpeed*1.5;
     const spreadN = upgrades.spread>0 ? (2 + upgrades.spread) : 1;
     const baseAng = Math.atan2(dy, dx);
-    // 散彈成組共 roll 暴擊（避免散彈×暴擊爆炸）
     const groupCrit = spreadN>1 ? (Math.random() < critChance()) : null;
     for (let k=0; k<spreadN; k++){
       let a = baseAng;
@@ -369,7 +445,7 @@
     sShoot();
   }
 
-  function critChance(){ return 0.08 + upgrades.crit*0.06; }   // 基礎 8% 暴擊，每級 +6%（5 級 = 38%）
+  function critChance(){ return 0.08 + upgrades.crit*0.06; }
   let lastSlowmoAt=0;
   function doHitstop(ms){ hitstopUntil=Math.max(hitstopUntil, Date.now()+ms); }
   function doSlowmo(ms){ if (Date.now()-lastSlowmoAt < 350) return; lastSlowmoAt=Date.now(); slowmoUntil=Math.max(slowmoUntil, Date.now()+ms); }
@@ -383,15 +459,49 @@
     for(let i=0;i<n;i++) particles.push({ x, y, dx:(Math.random()-0.5)*6, dy:(Math.random()-0.5)*6, life:18+Math.random()*14, color, r:1+Math.random()*2.5 });
   }
 
+  function shootBossBullet(boss, ang, spd, homing){
+    enemies.push({ x:boss.x, y:boss.y, r:6, headR:0, hp:999, speed:0, type:'彈', color:boss.color, headColor:boss.color, split:false, shoot:false, isProj:true, pdx:Math.cos(ang)*spd, pdy:Math.sin(ang)*spd, homing:!!homing, dmg:MODES[mode].hpDmg });
+  }
+  function bossAttack(boss){
+    const ang = Math.atan2(player.y-boss.y, player.x-boss.x);
+    if (boss.skills.includes('fan')){
+      const n = 3 + Math.floor(boss.bossIndex/10);
+      for (let k=0;k<n;k++){ shootBossBullet(boss, ang + (k-(n-1)/2)*0.16, 3.0); }
+    }
+    if (boss.skills.includes('ring')){
+      const n = 8 + Math.floor(boss.bossIndex/4);
+      for (let k=0;k<n;k++){ shootBossBullet(boss, k/n*Math.PI*2, 2.4); }
+    }
+    if (boss.skills.includes('homing')){
+      for (let k=0;k<3;k++){ shootBossBullet(boss, ang + (k-1)*0.3, 2.0, true); }
+    }
+    if (boss.skills.includes('spiral')){
+      boss.spiralAng += 0.45;
+      for (let k=0;k<6;k++){ shootBossBullet(boss, boss.spiralAng + k*Math.PI/3, 2.6); }
+    }
+    if (boss.skills.includes('spawn')){
+      for (let k=0;k<2;k++){ spawnMinion(boss); }
+    }
+    if (boss.skills.includes('charge')){
+      boss.charging = 550; boss.chargeAng = ang;
+    }
+    beep(300,0.08,'square',0.05);
+  }
+
   function loseHp(amt){
-    if (Date.now() < iframeUntil) return;   // i-frame 無敵
+    if (Date.now() < iframeUntil) return;
     hp -= amt;
     hpFill.style.width = Math.max(0, hp/player.maxHp*100)+'%';
     hpText.textContent = Math.max(0,Math.round(hp))+'/'+player.maxHp;
-    iframeUntil = Date.now()+DIFF[diff].iframe;
+    iframeUntil = Date.now()+MODES[mode].iframe;
     doShake(6); doFlash(); sHurt();
-    if (diff==='hard') { combo=0; }
+    if (mode==='hard'||mode==='hell') { combo=0; }
     if (hp<=0){ hp=0; hpFill.style.width='0%'; hpText.textContent='0/'+player.maxHp; endGame(); }
+  }
+
+  function unlockBoss(i){
+    const arr = getBestiary();
+    if (arr.indexOf(i)<0){ arr.push(i); saveBestiary(arr); }
   }
 
   function endGame(){
@@ -400,19 +510,33 @@
     overlay.querySelector('h1').textContent='💀 陣亡';
     overlay.querySelector('.sub').innerHTML='得分：'+score+'　最高：'+best+'　關卡：'+level;
     startBtn.textContent='再嚟';
-    document.getElementById('endlessBtn').style.display='none';
     overlay.classList.remove('hidden');
     document.getElementById('diffSel').classList.remove('hidden');
   }
   function win(){
     over=true; running=false; paused=false;
     if (score>best){ best=score; lsSet('bulletrain_best',String(best)); bestVal.textContent=best; }
+    // 記錄通關
+    const cleared = getCleared();
+    cleared[mode] = true; saveCleared(cleared);
+    const allClear = hellUnlocked();
     overlay.querySelector('h1').textContent='🏆 通關！';
-    overlay.querySelector('.sub').innerHTML='你過晒 5 關！得分：'+score+'　最高：'+best+'<br>可以繼續無盡挑戰刷分';
+    let msg = MODES[mode].name+'模式通關！得分：'+score+'　最高：'+best;
+    if (mode==='hell'){
+      msg += '<br>👑 你征服咗地獄！真正嘅獵人！';
+    } else if (allClear){
+      msg += '<br>👹 已解鎖隱藏關卡：地獄模式（50關全BOSS）！';
+      if (cleared.easy&&cleared.normal&&cleared.hard){ msg += '<br>（簡單+普通+困難 全部通關）'; }
+    } else {
+      const left = [];
+      if(!cleared.easy) left.push('簡單'); if(!cleared.normal) left.push('普通'); if(!cleared.hard) left.push('困難');
+      msg += '<br>仲差 '+left.join('、')+' 通關先解鎖地獄模式';
+    }
+    overlay.querySelector('.sub').innerHTML=msg;
     startBtn.textContent='再嚟';
-    document.getElementById('endlessBtn').style.display='block';
     overlay.classList.remove('hidden');
     document.getElementById('diffSel').classList.remove('hidden');
+    updateHellBtn();
   }
 
   function dash(){
@@ -420,7 +544,6 @@
     let dx=moveVec.x, dy=moveVec.y;
     let l=Math.hypot(dx,dy);
     if (l<0.1){
-      // 冇方向：向最近敵人反方向閃
       let tx=0, ty=1, bd=1e9;
       for (const e of enemies){
         if (e.isProj) continue;
@@ -433,7 +556,7 @@
     dashUntil=Date.now()+130;
     dashCdDur=Math.max(350, 750 - upgrades.dashCd*100);
     dashCd=Date.now()+dashCdDur;
-    iframeUntil=Math.max(iframeUntil, Date.now()+350);   // dash 無敵 350ms
+    iframeUntil=Math.max(iframeUntil, Date.now()+350);
     dashBtn.classList.add('cd');
   }
 
@@ -441,7 +564,7 @@
   function loop(t){
     requestAnimationFrame(loop);
     let dt = t-lastT; lastT=t;
-    if (dt>50) dt=50;   // dt clamp，防瞬移
+    if (dt>50) dt=50;
     const now=Date.now();
     if (now < dashCd){
       dashBtn.classList.add('cd');
@@ -455,12 +578,12 @@
     if (now<hitstopUntil) sim=false;
     else if (now<slowmoUntil) dt*=0.3;
     else if (hp/player.maxHp < 0.25){
-      dt*=0.65;   // 低血慢鏡
+      dt*=0.65;
       if (!lowHpWarned){ lowHpWarned=true; addText(W/2, H*0.4, '⚠️ 危險！低血量', '#ef4444', 22); }
     } else { lowHpWarned=false; }
 
     if (running && !over && !paused && sim){
-      const d=DIFF[diff];
+      const d=MODES[mode];
       const mv=Math.hypot(moveVec.x,moveVec.y);
       let vx=0, vy=0;
       if (now<dashUntil){ vx=dashVec.x*12; vy=dashVec.y*12; }
@@ -469,15 +592,15 @@
       player.x=Math.max(player.r,Math.min(W-player.r,player.x));
       player.y=Math.max(player.r,Math.min(H-player.r,player.y));
 
-      // 射擊（拖右搖桿瞄準，或開咗自動連射）
+      // 射擊
       const aiming = (aimVec.x!==0 || aimVec.y!==0);
       const baseIv = Math.max(60, 130 - upgrades.fireRate*12);
-      const iv = aiming ? baseIv : baseIv * 1.4;   // 手動瞄準滿速，自動連射慢 40%
+      const iv = aiming ? baseIv : baseIv * 1.4;
       if ((aiming || settings.autoFire) && Date.now()-lastShotAt > iv){
         fire(); lastShotAt=Date.now();
       }
 
-      // 完美閃避（dash 期間擦過敵人/子彈）
+      // 完美閃避
       if (now < dashUntil && now > lastGrazeAt+200){
         let grazed=false;
         for (const e of enemies){
@@ -486,52 +609,65 @@
         if (grazed){ lastGrazeAt=now; score+=5; addText(player.x, player.y-22, '完美閃避 +5', '#7dd3fc', 14); scoreVal.textContent=score; }
       }
 
-      // 波次生成
-      if (waveEnemiesLeft>0){
+      // 普通關生成
+      if (!bossActive && enemiesLeft>0){
         spawnTimer+=dt;
-        if (spawnTimer > Math.max(220, 750-wave*70-level*40)/d.spawn){ spawnTimer=0; spawnEnemy(); }
-      } else if (enemies.length===0){
-        waveCleared(); sim=false;
+        if (spawnTimer > Math.max(220, 750-level*40)/d.spawn){ spawnTimer=0; spawnEnemy(); }
+      } else if (!bossActive && enemiesLeft<=0 && enemies.length===0){
+        levelCleared(); sim=false;
       }
 
       // 子彈
       for (let i=bullets.length-1;i>=0;i--){
         const b=bullets[i];
         b.x += b.dx*(b.spd||8)*(dt/16.7); b.y += b.dy*(b.spd||8)*(dt/16.7);
-        // 反彈
         if (b.bounce>0){ if(b.x<0||b.x>W){b.dx=-b.dx;} if(b.y<0||b.y>H){b.dy=-b.dy;} }
         b.life--;
         let dead=b.life<=0||b.x<-20||b.x>W+20||b.y<-20||b.y>H+20;
         if (!dead){
           for (let j=enemies.length-1;j>=0;j--){
             const e=enemies[j];
-            if (e.isProj) continue;   // 唔打遠程敵彈
+            if (e.isProj) continue;
             const ddx=b.x-e.x, ddy=b.y-e.y;
             if (ddx*ddx+ddy*ddy < e.r*e.r){
-              const crit = (b.crit!==null && b.crit!==undefined) ? b.crit : (Math.random() < critChance());   // 散彈用成組 roll，單彈即時 roll
-              if (crit){ e.hp -= (1 + upgrades.dmg) * 3; }   // 暴擊 = 3x 傷害
+              const crit = (b.crit!==null && b.crit!==undefined) ? b.crit : (Math.random() < critChance());
+              if (crit){ e.hp -= (1 + upgrades.dmg) * 3; }
               else { e.hp -= (1 + upgrades.dmg); }
               if (e.hp<=0){
-                combo++; comboTimer=0;
-                score += 10*combo;
-                sKill();
-                if (crit){
-                  // 暴擊擊殺先出全套 juicy 反饋（慢鏡/hitstop/震屏/大字）
-                  doHitstop(25); doSlowmo(120); doShake(5); doFlash();
-                  sHeadshot();
-                  addParticles(e.x,e.y,e.headColor,16);
-                  addText(e.x,e.y,'暴擊 3x','#fbbf24',16);
+                if (e.isBoss){
+                  unlockBoss(e.bossIndex);
+                  combo++; comboTimer=0; score += 50*combo; sKill();
+                  doHitstop(40); doSlowmo(160); doShake(10); doFlash(); sHeadshot();
+                  addParticles(e.x,e.y,e.color,40);
+                  addText(e.x,e.y,'BOSS 撃破！','#fbbf24',22);
+                  bossActive=false; bossbar.style.display='none';
+                  bossObj=null;
+                  enemies.splice(j,1);
+                  // 清埋 boss 彈幕同召喚怪，爽快過關
+                  enemies = enemies.filter(x => !x.isProj && !x.minion);
+                  if (b.pierce > 0){ b.pierce--; } else { bullets.splice(i,1); }
+                  levelCleared(); sim=false;
+                  break;
                 } else {
-                  addParticles(e.x,e.y,e.color,10);
+                  combo++; comboTimer=0;
+                  score += 10*combo;
+                  sKill();
+                  if (crit){
+                    doHitstop(25); doSlowmo(120); doShake(5); doFlash();
+                    sHeadshot();
+                    addParticles(e.x,e.y,e.headColor,16);
+                    addText(e.x,e.y,'暴擊 3x','#fbbf24',16);
+                  } else {
+                    addParticles(e.x,e.y,e.color,10);
+                  }
+                  if (e.split){ for(let s=0;s<2;s++){ enemies.push({ x:e.x+(Math.random()-0.5)*20, y:e.y+(Math.random()-0.5)*20, r:10, headR:5, hp:1, speed:e.speed*1.1, type:'碎塊', color:'#c084fc', headColor:'#f0abfc', split:false, shoot:false }); } }
+                  enemies.splice(j,1);
                 }
-                if (e.split){ for(let s=0;s<2;s++){ enemies.push({ x:e.x+(Math.random()-0.5)*20, y:e.y+(Math.random()-0.5)*20, r:10, headR:5, hp:1, speed:e.speed*1.1, type:'碎塊', color:'#c084fc', headColor:'#f0abfc', split:false, shoot:false }); } }
-                enemies.splice(j,1);
               } else {
-                if (crit){ addText(e.x,e.y,'暴擊','#fbbf24',12); beep(980,0.06,'sine',0.06); }   // 未殺敵暴擊：細叮
+                if (crit){ addText(e.x,e.y,'暴擊','#fbbf24',12); beep(980,0.06,'sine',0.06); }
                 beep(300,0.04,'square',0.04);
                 addParticles(b.x,b.y,'#94a3b8',3);
               }
-              // 穿透：有 pierce 就保留子彈，扣一次
               if (b.pierce > 0){ b.pierce--; }
               else { bullets.splice(i,1); }
               break;
@@ -541,33 +677,69 @@
         if (dead && bullets.length>0 && bullets[i]) bullets.splice(i,1);
       }
 
-      // 敵人移動/攻擊（倒序，方便 splice 撞完直接消失）
+      // 敵人移動/攻擊
       for (let i=enemies.length-1;i>=0;i--){
         const e=enemies[i];
         const dx=player.x-e.x, dy=player.y-e.y, dd=Math.hypot(dx,dy)||1;
         if (e.isProj){
-          // 遠程彈：直飛，撞玩家扣血後消失（iframe 內穿過唔扣血唔刪）
           e.x+=e.pdx*(dt/16.7); e.y+=e.pdy*(dt/16.7);
-          if (dd < e.r + player.r){ if (Date.now() >= iframeUntil){ loseHp(d.hpDmg); enemies.splice(i,1); } if (over) break; }
+          // 追蹤彈：慢慢轉向玩家
+          if (e.homing){
+            const a = Math.atan2(player.y-e.y, player.x-e.x);
+            const cur = Math.atan2(e.pdy, e.pdx);
+            let diff = a - cur;
+            while (diff > Math.PI) diff -= Math.PI*2;
+            while (diff < -Math.PI) diff += Math.PI*2;
+            const na = cur + Math.max(-0.05, Math.min(0.05, diff));
+            const spd = Math.hypot(e.pdx,e.pdy)||2;
+            e.pdx = Math.cos(na)*spd; e.pdy = Math.sin(na)*spd;
+          }
+          if (dd < e.r + player.r){ if (Date.now() >= iframeUntil){ loseHp(e.dmg||d.hpDmg); enemies.splice(i,1); } if (over) break; }
+          continue;
+        }
+        if (e.isBoss){
+          // Boss：左右徘徊 + 出招 + 衝撞
+          if (e.charging > 0){
+            e.charging -= dt;
+            e.x += Math.cos(e.chargeAng)*6*(dt/16.7);
+            e.y += Math.sin(e.chargeAng)*6*(dt/16.7);
+          } else {
+            e.x += e.dir * e.speed * (dt/16.7);
+            if (e.x < e.r+10){ e.dir = 1; }
+            if (e.x > W-e.r-10){ e.dir = -1; }
+          }
+          e.x = Math.max(e.r, Math.min(W-e.r, e.x));
+          e.y = Math.max(e.r, Math.min(H*0.4, e.y));
+          e.skillCd -= dt;
+          if (e.skillCd <= 0){ e.skillCd = e.skillInterval; bossAttack(e); }
+          // Boss 撞玩家（Boss 唔消失）
+          if (dd < e.r + player.r){
+            if (Date.now() >= iframeUntil){ loseHp(d.hpDmg); }
+            const push = e.r + player.r - dd + 1;
+            player.x += dx/dd*push; player.y += dy/dd*push;
+          }
+          // 更新 boss 血條
+          bossFill.style.width = Math.max(0, e.hp/e.maxHp*100)+'%';
+          bossText.textContent = e.name+' '+Math.max(0,Math.ceil(e.hp));
           continue;
         }
         if (e.shoot){
-          // 遠程怪：保持距離（160~260 之間企定射）
+          // 遠程怪：要接近到一定距離先攻擊（入場先接近，dd<200 先開火）
           let mx=0, my=0;
-          if (dd < 160){ mx=-dx/dd; my=-dy/dd; }
-          else if (dd > 260){ mx=dx/dd; my=dy/dd; }
+          if (dd < 140){ mx=-dx/dd; my=-dy/dd; }
+          else if (dd > 220){ mx=dx/dd; my=dy/dd; }
           e.x+=mx*e.speed*(dt/16.7); e.y+=my*e.speed*(dt/16.7);
           e.shootCd-=dt;
-          if (e.shootCd<=0 && dd<320){ e.shootCd=1800; enemies.push({ x:e.x, y:e.y, r:6, headR:0, hp:999, speed:0, type:'彈', color:'#f87171', headColor:'#f87171', split:false, shoot:false, isProj:true, pdx:dx/dd*3.5, pdy:dy/dd*3.5 }); }
+          if (e.shootCd<=0 && dd<200){ e.shootCd=1600; enemies.push({ x:e.x, y:e.y, r:6, headR:0, hp:999, speed:0, type:'彈', color:'#f87171', headColor:'#f87171', split:false, shoot:false, isProj:true, pdx:dx/dd*3.5, pdy:dy/dd*3.5, dmg:d.hpDmg }); }
         } else {
           e.x+=(dx/dd)*e.speed*(dt/16.7); e.y+=(dy/dd)*e.speed*(dt/16.7);
         }
         if (dd < e.r + player.r){
-          if (Date.now() >= iframeUntil){ loseHp(d.hpDmg); enemies.splice(i,1); }   // iframe 內敵人穿過，唔扣血唔刪
+          if (Date.now() >= iframeUntil){ loseHp(d.hpDmg); enemies.splice(i,1); }
           if (over) break;
         }
       }
-      // 清走飛出畫面嘅遠程彈
+      // 清走飛出畫面嘅彈
       enemies = enemies.filter(e => !(e.isProj && (e.x<-30||e.x>W+30||e.y<-30||e.y>H+30)));
 
       // combo 衰減
@@ -586,24 +758,34 @@
     ctx.save();
     if (Date.now()<shakeUntil) ctx.translate((Math.random()-0.5)*shakeMag,(Math.random()-0.5)*shakeMag);
     ctx.clearRect(0,0,W,H);
-    // 網格
     ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1;
     for(let x=0;x<=W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
     for(let y=0;y<=H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-    // 粒子
     for(const p of particles){ ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fill(); }
     // 敵人
     for(const e of enemies){
+      if (e.isBoss){
+        // Boss 大圈 + 核心 + 眼睛
+        ctx.fillStyle=e.color; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,7); ctx.fill();
+        ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,7); ctx.stroke();
+        ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(e.x,e.y,e.r*0.55,0,7); ctx.fill();
+        ctx.fillStyle='#fff';
+        ctx.beginPath(); ctx.arc(e.x-e.r*0.22, e.y-e.r*0.1, e.r*0.12,0,7); ctx.fill();
+        ctx.beginPath(); ctx.arc(e.x+e.r*0.22, e.y-e.r*0.1, e.r*0.12,0,7); ctx.fill();
+        ctx.fillStyle='#000';
+        ctx.beginPath(); ctx.arc(e.x-e.r*0.22, e.y-e.r*0.1, e.r*0.05,0,7); ctx.fill();
+        ctx.beginPath(); ctx.arc(e.x+e.r*0.22, e.y-e.r*0.1, e.r*0.05,0,7); ctx.fill();
+        continue;
+      }
       ctx.fillStyle=e.color; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,7); ctx.fill();
       ctx.fillStyle=e.headColor;
       ctx.beginPath(); ctx.arc(e.x, e.y-e.r*0.45, e.headR,0,7); ctx.fill();
       ctx.fillStyle='#111';
       ctx.beginPath(); ctx.arc(e.x-2, e.y-e.r*0.45-1, 1.6,0,7); ctx.fill();
       ctx.beginPath(); ctx.arc(e.x+2, e.y-e.r*0.45-1, 1.6,0,7); ctx.fill();
-      // 坦克 hp 提示
       if (e.type==='坦克'){ ctx.fillStyle='rgba(255,255,255,.7)'; ctx.font='10px sans-serif'; ctx.textAlign='center'; ctx.fillText(e.hp+'♥', e.x, e.y+e.r+12); }
     }
-    // 子彈（拖尾）
+    // 子彈
     for(const b of bullets){
       const bc = b.bounce>0 ? 'rgba(34,211,238,.55)' : 'rgba(253,230,138,.5)';
       const bf = b.bounce>0 ? '#22d3ee' : '#fde68a';
@@ -611,12 +793,11 @@
       ctx.beginPath(); ctx.moveTo(b.x-b.dx*10,b.y-b.dy*10); ctx.lineTo(b.x,b.y); ctx.stroke();
       ctx.fillStyle=bf; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,7); ctx.fill();
     }
-    // 玩家（dash 殘影 + 閃爍無敵）
+    // 玩家
     const blink = (Date.now()<iframeUntil && !(Date.now()<dashUntil)) && (Math.floor(Date.now()/120)%2===0);
     if (blink) ctx.globalAlpha=0.4;
     ctx.fillStyle='#38bdf8'; ctx.beginPath(); ctx.arc(player.x,player.y,player.r,0,7); ctx.fill();
     ctx.fillStyle='#0ea5e9'; ctx.beginPath(); ctx.arc(player.x,player.y,player.r*0.65,0,7); ctx.fill();
-    // 槍口指向（右搖桿瞄準 or 最近敵人）
     let aimAng=null;
     if (aimVec.x!==0||aimVec.y!==0){
       aimAng = Math.atan2(aimVec.y, aimVec.x);
@@ -627,11 +808,8 @@
     }
     if (aimAng!==null){ ctx.strokeStyle='#fde68a'; ctx.lineWidth=4; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(player.x,player.y); ctx.lineTo(player.x+Math.cos(aimAng)*22,player.y+Math.sin(aimAng)*22); ctx.stroke(); }
     ctx.globalAlpha=1;
-    // 漂浮文字
     for(const t of texts){ ctx.fillStyle=t.color; ctx.font='bold '+t.size+'px sans-serif'; ctx.textAlign='center'; ctx.globalAlpha=Math.min(1,t.life/20); ctx.fillText(t.str,t.x,t.y); ctx.globalAlpha=1; }
-    // 屏幕閃光
     if (Date.now()<flashUntil){ ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(0,0,W,H); }
-    // 低血紅光
     if (running && hp/player.maxHp < 0.25){ ctx.fillStyle='rgba(239,68,68,0.10)'; ctx.fillRect(0,0,W,H); }
     ctx.restore();
   }
@@ -656,12 +834,12 @@
     if (now-lastToggleAt<300) return;
     lastToggleAt=now;
     if (over) return;
-    if (!upg.classList.contains('hidden')) return;  // 升級畫面唔暫停
+    if (!upg.classList.contains('hidden')) return;
     paused = !paused;
     if (paused){
       document.getElementById('diffSel').classList.add('hidden');
       overlay.querySelector('h1').textContent='⏸ 暫停';
-      overlay.querySelector('.sub').innerHTML='得分：'+score+'　關卡：'+level+'　波：'+wave;
+      overlay.querySelector('.sub').innerHTML='得分：'+score+'　關卡：'+level;
       startBtn.textContent='繼續';
       overlay.classList.remove('hidden');
     } else {
@@ -691,9 +869,46 @@
   tglSound.addEventListener('pointerdown',function(e){ e.preventDefault(); settings.sound=!settings.sound; saveSettings(); syncToggles(); });
   tglAutoFire.addEventListener('pointerdown',function(e){ e.preventDefault(); settings.autoFire=!settings.autoFire; saveSettings(); syncToggles(); });
 
+  // 收藏格
+  function renderBestiary(){
+    const arr = getBestiary();
+    const grid = document.getElementById('grid');
+    grid.innerHTML='';
+    const total = arr.length;
+    const info = document.getElementById('bestiaryInfo');
+    info.textContent = '已解鎖 '+total+'／50 隻 BOSS';
+    for (let i=1;i<=50;i++){
+      const c = document.createElement('div');
+      c.className = 'cell';
+      if (arr.indexOf(i)>=0){
+        c.classList.add(i>=46 ? 'hell' : 'unlocked');
+        c.textContent = i;
+        c.title = bossName(i);
+      } else {
+        c.textContent = '?';
+      }
+      grid.appendChild(c);
+    }
+  }
+  const bestiaryPanel = document.getElementById('bestiary');
+  document.getElementById('bestiaryBtn').addEventListener('pointerdown',function(e){ e.preventDefault(); renderBestiary(); bestiaryPanel.classList.remove('hidden'); });
+  document.getElementById('closeBestiary').addEventListener('pointerdown',function(e){ e.preventDefault(); bestiaryPanel.classList.add('hidden'); });
+
   // 難度選擇
+  function updateHellBtn(){
+    const hellBtn = document.getElementById('hellBtn');
+    if (hellUnlocked()){ hellBtn.style.display=''; }
+    else { hellBtn.style.display='none'; if (mode==='hell'){ mode='easy'; document.querySelectorAll('#diffSel .dbtn').forEach(x=>x.classList.remove('sel')); document.querySelector('#diffSel .dbtn[data-d="easy"]').classList.add('sel'); } }
+  }
+  updateHellBtn();
   document.querySelectorAll('#diffSel .dbtn').forEach(function(b){
-    b.addEventListener('pointerdown',function(e){ e.preventDefault(); diff=b.getAttribute('data-d'); document.querySelectorAll('#diffSel .dbtn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); });
+    b.addEventListener('pointerdown',function(e){
+      e.preventDefault();
+      if (b.getAttribute('data-d')==='hell' && !hellUnlocked()) return;
+      mode=b.getAttribute('data-d');
+      document.querySelectorAll('#diffSel .dbtn').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');
+    });
   });
 
   let lastStartAt=0;
@@ -705,17 +920,6 @@
   }
   startBtn.addEventListener('pointerdown',function(e){ e.preventDefault(); safeStart(); });
   startBtn.addEventListener('click',function(e){ e.preventDefault(); safeStart(); });
-
-  // 繼續無盡
-  function continueEndless(){
-    document.getElementById('endlessBtn').style.display='none';
-    document.getElementById('diffSel').classList.add('hidden');
-    overlay.classList.add('hidden');
-    over=false; running=true; paused=false; endless=true;
-    startWave();
-    lastT=performance.now();
-  }
-  document.getElementById('endlessBtn').addEventListener('pointerdown', function(e){ e.preventDefault(); continueEndless(); });
 
   // 初始
   resetGame();
