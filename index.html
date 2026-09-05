@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>彈雨獵人</title>
+<style>
+  :root {
+    --bg:#0b0d14; --panel:#151823; --border:#2a3048;
+    --accent:#f43f5e; --gold:#fbbf24; --green:#4ade80; --blue:#38bdf8;
+    --text:#e5e7eb; --muted:#9ca3af;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; overflow:hidden; overscroll-behavior:none; }
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:"Segoe UI","PingFang HK","Microsoft JhengHei",system-ui,sans-serif;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    height:100vh; height:100dvh; user-select:none; -webkit-user-select:none;
+    touch-action:none; position:relative;
+  }
+  #wrap { position:relative; touch-action:none; }
+  canvas { display:block; background:#0e1017; touch-action:none; }
+  .hud { position:absolute; top:8px; left:8px; right:8px; display:flex; justify-content:space-between; align-items:flex-start; pointer-events:none; z-index:5; }
+  .hud .col { display:flex; flex-direction:column; gap:3px; }
+  .hud .box { background:rgba(15,17,25,.72); border:1px solid var(--border); border-radius:8px; padding:3px 10px; text-align:center; }
+  .hud .lbl { font-size:9px; color:var(--muted); }
+  .hud .val { font-size:16px; font-weight:800; }
+  #scoreVal{color:var(--gold);} #comboVal{color:var(--accent);} #bestVal{color:var(--green);}
+  #waveVal{color:var(--blue);} #lvlVal{color:#c084fc;}
+  .hpbar { position:absolute; top:8px; left:50%; transform:translateX(-50%); width:130px; height:18px; background:rgba(255,255,255,.12); border-radius:9px; overflow:hidden; z-index:5; pointer-events:none; }
+  #hpFill { position:absolute; left:0; top:0; bottom:0; width:100%; background:var(--green); border-radius:9px; transition:width .15s; }
+  #hpText { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; color:#fff; text-shadow:0 0 3px rgba(0,0,0,.9); }
+  .pausebtn { position:absolute; top:54px; right:10px; width:40px; height:40px; border-radius:11px; background:rgba(15,17,25,.72); border:1px solid var(--border); color:#fff; font-size:18px; z-index:6; touch-action:none; pointer-events:auto; }
+  .pausebtn:active { background:rgba(255,255,255,.15); }
+  .joy { position:absolute; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,.05); border:1.5px solid rgba(255,255,255,.18); z-index:6; touch-action:none; pointer-events:auto; }
+  #joyL { left:14px; bottom:14px; }
+  #joyR { right:14px; bottom:14px; }
+  .dashbtn.cd { opacity:.55; }
+  .knob { position:absolute; width:48px; height:48px; border-radius:50%; background:rgba(255,255,255,.22); left:36px; top:36px; pointer-events:none; }
+  .dashbtn { position:absolute; right:16px; bottom:115px; width:56px; height:56px; border-radius:50%; background: conic-gradient(#38bdf8 calc(var(--cd,0)*1%), rgba(56,189,248,.15) 0); border:1.5px solid rgba(56,189,248,.5); color:#7dd3fc; font-size:12px; font-weight:800; z-index:6; touch-action:none; pointer-events:auto; display:flex; align-items:center; justify-content:center; }
+  .dashbtn:active { background:rgba(56,189,248,.35); }
+  .overlay { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center; background:rgba(8,10,16,.94); padding:20px; }
+  .overlay h1 { font-size:28px; letter-spacing:2px; }
+  .overlay .sub { color:var(--muted); font-size:13px; line-height:1.7; }
+  .overlay .btn { background:var(--accent); color:#fff; border:none; border-radius:12px; padding:13px 30px; font-size:16px; font-weight:800; letter-spacing:1px; cursor:pointer; touch-action:manipulation; }
+  .overlay .btn:active { transform:scale(.95); }
+  .diff { display:flex; gap:8px; margin-top:2px; }
+  .diff .dbtn { background:var(--panel); border:1.5px solid var(--border); border-radius:10px; padding:8px 16px; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; touch-action:manipulation; }
+  .diff .dbtn.sel { border-color:var(--accent); color:#fff; background:rgba(244,63,94,.18); }
+  .gear { background:var(--panel) !important; border:1.5px solid var(--border) !important; color:var(--muted) !important; font-size:14px !important; }
+  #settings { position:absolute; inset:0; z-index:12; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; background:rgba(8,10,16,.96); padding:16px; }
+  #settings h2 { font-size:20px; letter-spacing:1px; }
+  .setrow { width:100%; max-width:270px; display:flex; align-items:center; justify-content:space-between; background:var(--panel); border:1.5px solid var(--border); border-radius:12px; padding:12px 18px; font-size:15px; font-weight:700; }
+  .tgl { background:rgba(255,255,255,.08); border:1.5px solid var(--border); border-radius:20px; padding:6px 18px; font-size:13px; font-weight:800; color:var(--muted); cursor:pointer; touch-action:manipulation; min-width:56px; }
+  .tgl.on { border-color:var(--green); color:var(--green); background:rgba(74,222,128,.14); }
+  #upg { position:absolute; inset:0; z-index:11; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; background:rgba(8,10,16,.95); padding:16px; }
+  #upg h2 { font-size:20px; letter-spacing:1px; }
+  .upgcard { width:100%; max-width:260px; background:var(--panel); border:1.5px solid var(--border); border-radius:12px; padding:12px; text-align:left; cursor:pointer; touch-action:manipulation; }
+  .upgcard:active { border-color:var(--gold); }
+  .upgcard .n { color:var(--gold); font-size:14px; font-weight:800; }
+  .upgcard .d { color:var(--muted); font-size:12px; line-height:1.5; }
+  .hidden { display:none !important; }
+  .warn { color:var(--accent); font-size:13px; font-weight:700; text-align:center; min-height:18px; }
+</style>
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="game"></canvas>
+    <div class="hud">
+      <div class="col">
+        <div class="box"><div class="lbl">分數</div><div class="val" id="scoreVal">0</div></div>
+        <div class="box"><div class="lbl">COMBO</div><div class="val" id="comboVal">×1</div></div>
+      </div>
+      <div class="col" style="align-items:flex-end;">
+        <div class="box"><div class="lbl">關卡</div><div class="val" id="lvlVal">1</div></div>
+        <div class="box"><div class="lbl">波</div><div class="val" id="waveVal">1</div></div>
+        <div class="box"><div class="lbl">最高</div><div class="val" id="bestVal">0</div></div>
+      </div>
+    </div>
+    <div class="hpbar"><div id="hpFill"></div><div id="hpText">100</div></div>
+    <button class="pausebtn" id="pauseBtn" type="button">⏸</button>
+    <div class="joy" id="joyL"><div class="knob" id="knobL"></div></div>
+    <div class="joy" id="joyR"><div class="knob" id="knobR"></div></div>
+    <button class="dashbtn" id="dashBtn" type="button">DASH</button>
+    <div class="overlay" id="overlay">
+      <h1>🔫 彈雨獵人</h1>
+      <div class="sub">左搖桿移動 · DASH 閃避<br>🔫 自動射擊已開（設定可關→手動瞄準）<br>💥 暴擊 3x · 連鎖 COMBO<br>🏆 過晒 5 關就勝利<br>⚠️ 開始後不能更換橫屏／豎屏</div>
+      <div class="diff" id="diffSel">
+        <button class="dbtn sel" data-d="easy" type="button">簡單</button>
+        <button class="dbtn" data-d="normal" type="button">普通</button>
+        <button class="dbtn" data-d="hard" type="button">困難</button>
+      </div>
+      <button class="btn" id="startBtn" type="button">開始</button>
+      <button class="btn" id="endlessBtn" type="button" style="display:none;background:#fbbf24;color:#111">繼續無盡</button>
+      <button class="btn gear" id="gearBtn" type="button">⚙️ 設定</button>
+      <button class="btn gear" id="tutorBtn" type="button">❓ 教學</button>
+      <div class="sub">📲 加至主畫面體驗更佳！</div>
+    </div>
+    <div id="settings" class="hidden">
+      <h2>⚙️ 設定</h2>
+      <div class="setrow"><span>🔊 音效</span><button class="tgl" id="tglSound" type="button">開</button></div>
+      <div class="setrow"><span>🔫 自動連射</span><button class="tgl" id="tglAutoFire" type="button">開</button></div>
+      <div class="sub" style="color:var(--muted);font-size:11px;max-width:270px;line-height:1.6;">開＝自動追蹤射擊（射速略慢）；關＝右搖桿手動瞄準（射速最快）</div>
+      <button class="btn" id="closeSettings" type="button">完成</button>
+    </div>
+    <div id="upg" class="hidden"></div>
+  </div>
+
+<script>
+(function () {
+  const canvas = document.getElementById('game');
+  const wrap = document.getElementById('wrap');
+  const ctx = canvas.getContext('2d');
+  const overlay = document.getElementById('overlay');
+  const startBtn = document.getElementById('startBtn');
+  const upg = document.getElementById('upg');
+  const scoreVal = document.getElementById('scoreVal');
+  const comboVal = document.getElementById('comboVal');
+  const bestVal = document.getElementById('bestVal');
+  const lvlVal = document.getElementById('lvlVal');
+  const waveVal = document.getElementById('waveVal');
+  const hpFill = document.getElementById('hpFill');
+  const joyL = document.getElementById('joyL'), knobL = document.getElementById('knobL');
+  const joyR = document.getElementById('joyR'), knobR = document.getElementById('knobR');
+  const dashBtn = document.getElementById('dashBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const hpText = document.getElementById('hpText');
+
+  let W = 400, H = 700, orientationLocked = false;
+  function fitViewport(){
+    const s = Math.min(window.innerWidth/W, window.innerHeight/H);
+    wrap.style.transform = 'scale('+s+')';
+    wrap.style.transformOrigin = 'center center';
+  }
+  function layoutControls(isLand){
+    // 自動連射開：收埋右搖桿，DASH 放右下角（單手）
+    // 自動連射關：顯示右搖桿，DASH 搬開唔好重疊
+    if (settings.autoFire){
+      joyR.style.display = 'none';
+      if (isLand){ dashBtn.style.right='120px'; dashBtn.style.bottom='24px'; }
+      else { dashBtn.style.right='16px'; dashBtn.style.bottom='16px'; }
+    } else {
+      joyR.style.display = '';
+      if (isLand){ dashBtn.style.right='140px'; dashBtn.style.bottom='24px'; }
+      else { dashBtn.style.right='16px'; dashBtn.style.bottom='150px'; }
+    }
+  }
+  function applyOrientation(){
+    const isLand = (window.innerWidth > window.innerHeight);
+    W = isLand ? 760 : 400;
+    H = isLand ? 400 : 700;
+    canvas.width = W; canvas.height = H;
+    fitViewport();
+    layoutControls(isLand);
+  }
+  applyOrientation();
+  window.addEventListener('resize', function(){ if (!orientationLocked){ applyOrientation(); } else { fitViewport(); } });
+  window.addEventListener('orientationchange', function(){ setTimeout(function(){ if (!orientationLocked){ applyOrientation(); } else { fitViewport(); } }, 200); });
+
+  // ---------- localStorage ----------
+  function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+  function lsSet(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+  // 設定（玩家可改）
+  let settings = { sound:true, autoFire:true };
+  function saveSettings(){ try { localStorage.setItem('bulletrain_settings', JSON.stringify(settings)); } catch(e){} }
+  (function(){ try { const s=JSON.parse(localStorage.getItem('bulletrain_settings')||'{}'); settings=Object.assign(settings,s); } catch(e){} })();
+  function lsNum(k){ const v=lsGet(k); return v?parseInt(v,10)||0:0; }
+  let best = lsNum('bulletrain_best'); bestVal.textContent = best;
+
+  // ---------- 音效（WebAudio 合成） ----------
+  let AC = null;
+  function audio(){
+    if (!AC) { try { AC = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){} }
+    if (AC && AC.state==='suspended') AC.resume();
+    return AC;
+  }
+  function beep(freq, dur, type, vol){
+    if (!settings.sound) return;
+    const ac = audio(); if (!ac) return;
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type||'square'; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol||0.08, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime+dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime+dur);
+  }
+  function sShoot(){ beep(880,0.05,'square',0.03); }
+  function sHeadshot(){ beep(1320,0.12,'sine',0.14); beep(1760,0.09,'sine',0.08); }
+  function sKill(){ beep(220,0.12,'sawtooth',0.08); }
+  function sHurt(){ beep(110,0.2,'sawtooth',0.12); }
+  function sWave(){ beep(520,0.15,'sine',0.1); }
+
+  // ---------- 狀態 ----------
+  const DIFF = { easy:{name:'簡單',spd:1.3,hpDmg:6,spawn:1.0,iframe:1000}, normal:{name:'普通',spd:2.2,hpDmg:10,spawn:1.35,iframe:800}, hard:{name:'困難',spd:3.6,hpDmg:22,spawn:2.0,iframe:500} };
+  let diff = 'easy';
+  let running=false, over=false, paused=false, endless=false;
+  let player, bullets, enemies, particles, texts;
+  let score, combo, comboTimer, hp, level, wave;
+  let waveTimer, spawnTimer, waveEnemiesLeft, firstWave=false;
+  let hitstopUntil=0, slowmoUntil=0, shakeUntil=0, shakeMag=0, flashUntil=0;
+  let moveVec={x:0,y:0}, aimVec={x:0,y:0};
+  let lastShotAt=0, dashCd=0, dashCdDur=0, dashUntil=0, dashVec={x:0,y:0}, lastGrazeAt=0;
+  let iframeUntil=0, lowHpWarned=false;
+  let upgrades = { fireRate:0, dmg:0, spd:0, maxhp:0, bulletSpeed:0, pierce:0, crit:0, dashCd:0 };
+  let lastT=0;
+
+  function resetGame(){
+    player = { x:W/2, y:H-140, r:13, hp:100, maxHp:100 };
+    hp = player.maxHp;
+    bullets=[]; enemies=[]; particles=[]; texts=[];
+    score=0; combo=0; comboTimer=0; level=1; wave=1;
+    waveTimer=0; spawnTimer=0; waveEnemiesLeft=0;
+    hitstopUntil=0; slowmoUntil=0; shakeUntil=0; shakeMag=0; flashUntil=0;
+    moveVec={x:0,y:0}; aimVec={x:0,y:0}; endless=false;
+    lastShotAt=0; dashCd=0; dashCdDur=0; dashUntil=0; dashVec={x:0,y:0}; iframeUntil=0; lowHpWarned=false;
+    upgrades = { fireRate:0, dmg:0, spd:0, maxhp:0, bulletSpeed:0, pierce:0, crit:0, dashCd:0 };
+    scoreVal.textContent='0'; comboVal.textContent='×1'; lvlVal.textContent='1'; waveVal.textContent='1';
+    hpFill.style.width='100%'; hpText.textContent=hp+'/'+player.maxHp;
+  }
+
+  function showTutorial(){
+    const tuts = [
+      {t:400,  s:'🕹 左搖桿移動'},
+      {t:2200, s:(settings.autoFire ? '🔫 自動射擊已開，專心移動' : '🎯 右搖桿瞄準開火')},
+      {t:4000, s:'💨 DASH 閃避'},
+      {t:5800, s:'💥 暴擊：每槍 8% 機率 3 倍傷害'},
+    ];
+    tuts.forEach(function(t){ setTimeout(function(){ if(running && !over) addText(W/2, H*0.45, t.s, '#fbbf24', 18); }, t.t); });
+  }
+  function startGame(){
+    applyOrientation();
+    orientationLocked = true;
+    resetGame();
+    over=false; running=true; paused=false;
+    document.getElementById('endlessBtn').style.display='none';
+    overlay.classList.add('hidden'); upg.classList.add('hidden');
+    startWave();
+    lastT=performance.now();
+    if (!lsGet('bulletrain_tutored')){ lsSet('bulletrain_tutored','1'); showTutorial(); }
+  }
+
+  // ---------- 關卡 / 波次 ----------
+  function startWave(){
+    firstWave = (level===1 && wave===1);
+    waveEnemiesLeft = firstWave ? 3 : (3 + wave*2 + level*2);
+    spawnTimer=0;
+    sWave();
+    addText(W/2, H*0.35, '第 '+level+' 關 · 第 '+wave+' 波', '#38bdf8', 28);
+    waveVal.textContent=wave;
+  }
+  function waveCleared(){
+    if (wave >= 3) {
+      if (endless) {
+        // 無盡：波次無限遞增，難度持續上升，唔再彈勝利
+        wave=1; level++; lvlVal.textContent=level;
+      } else {
+        const hpRatio = hp/player.maxHp;
+        let rank, bonus;
+        if (hpRatio >= 0.99){ rank='S'; bonus=200; }
+        else if (hpRatio>=0.85){ rank='A'; bonus=100; }
+        else if (hpRatio>=0.6){ rank='B'; bonus=50; }
+        else { rank='C'; bonus=0; }
+        score += bonus;
+        scoreVal.textContent = score;
+        addText(W/2, H*0.42, '評價 '+rank+(bonus>0?' +'+bonus:''), '#fbbf24', 32);
+        level++; wave=1; lvlVal.textContent=level;
+        if (level > 5) { win(); return; }
+      }
+    }
+    else { wave++; }
+    // 升級三選一
+    showUpgrade();
+  }
+  function showUpgrade(){
+    running=false;
+    const opts = rollUpgrades();
+    upg.innerHTML='';
+    const h=document.createElement('h2'); h.textContent='⬆️ 揀一個升級'; upg.appendChild(h);
+    opts.forEach(o=>{
+      const c=document.createElement('div'); c.className='upgcard';
+      c.innerHTML='<div class="n">'+o.n+'</div><div class="d">'+o.d+'</div>';
+      let done=false;
+      c.addEventListener('pointerdown', function(e){ e.preventDefault(); if(!done){ done=true; applyUpgrade(o); } });
+      c.addEventListener('click', function(e){ e.preventDefault(); if(!done){ done=true; applyUpgrade(o); } });
+      upg.appendChild(c);
+    });
+    upg.classList.remove('hidden');
+  }
+  function rollUpgrades(){
+    const all = [
+      {n:'射速 +', d:'射擊間隔縮短', k:'fireRate'},
+      {n:'傷害 +', d:'子彈傷害提升', k:'dmg'},
+      {n:'移速 +', d:'移動更快', k:'spd'},
+      {n:'最大生命 +', d:'回滿血並加血上限', k:'maxhp'},
+      {n:'彈速 +', d:'子彈飛更快', k:'bulletSpeed'},
+      {n:'穿透 +', d:'子彈可穿透多一個敵人', k:'pierce'},
+      {n:'暴擊率 +', d:'每級 +6% 機率 3x 暴擊', k:'crit', max:5},
+      {n:'閃避冷卻 -', d:'DASH 更快回好', k:'dashCd', max:4},
+      {n:'散彈 +', d:'一次射多粒', k:'spread', max:3},
+      {n:'反彈', d:'子彈撞牆反彈', k:'bounce', max:1},
+    ];
+    let pool = all.filter(o => (upgrades[o.k]||0) < (o.max||99));
+    if (pool.length===0){ pool = [ {n:'傷害 +', d:'子彈傷害提升', k:'dmg'}, {n:'射速 +', d:'射擊間隔縮短', k:'fireRate'}, {n:'移速 +', d:'移動更快', k:'spd'} ]; }
+    const idx = [Math.floor(Math.random()*pool.length)];
+    while (idx.length<3 && pool.length>1){ const r=Math.floor(Math.random()*pool.length); if(idx.indexOf(r)<0) idx.push(r); }
+    return idx.map(i=>pool[i]);
+  }
+  function applyUpgrade(o){
+    const k=o.k;
+    if(k==='maxhp'){ player.maxHp+=20; hp=player.maxHp; player.hp=player.maxHp; hpFill.style.width='100%'; hpText.textContent=hp+'/'+player.maxHp; }
+    else { upgrades[k] = (upgrades[k]||0)+1; }
+    upg.classList.add('hidden');
+    running=true; paused=false;
+    startWave();
+  }
+
+  // ---------- 敵人 ----------
+  function spawnEnemy(){
+    const side = firstWave ? 0 : Math.floor(Math.random()*3);
+    let x,y;
+    if(side===0){ x=Math.random()*W; y=-22; } else if(side===1){ x=-22; y=Math.random()*(H*0.45); } else { x=W+22; y=Math.random()*(H*0.45); }
+    const d=DIFF[diff];
+    const type = pickType(level);
+    let hp = type.hp + (diff==='hard' ? 1 : 0);
+    let e = { x, y, r:15, headR:7, hp, speed:type.speed*d.spd, type:type.name, color:type.color, headColor:type.headColor, split:type.split, shoot:type.shoot, shootCd:0 };
+    enemies.push(e);
+    waveEnemiesLeft--;
+  }
+  function pickType(lv){
+    const r=Math.random();
+    if (lv>=2 && r<0.12) return { name:'坦克', hp:3, speed:0.55, color:'#f97316', headColor:'#fde68a', split:false, shoot:false };
+    if (lv>=3 && r<0.24) return { name:'快腳', hp:1, speed:1.5, color:'#22d3ee', headColor:'#cffafe', split:false, shoot:false };
+    if (lv>=4 && r<0.32) return { name:'分裂', hp:1, speed:0.9, color:'#a855f7', headColor:'#f0abfc', split:true, shoot:false };
+    if (lv>=5 && r<0.40) return { name:'遠程', hp:2, speed:0.6, color:'#ef4444', headColor:'#fecaca', split:false, shoot:true };
+    return { name:'普通', hp:1, speed:1, color:'#7c3aed', headColor:'#fbbf24', split:false, shoot:false };
+  }
+
+  function fire(){
+    if (Date.now()<hitstopUntil) return;
+    let dx, dy;
+    if (aimVec.x!==0 || aimVec.y!==0){
+      // 右搖桿瞄準：跟拖拽方向
+      const l=Math.hypot(aimVec.x,aimVec.y)||1; dx=aimVec.x/l; dy=aimVec.y/l;
+    } else {
+      // 自動追蹤最近敵人（非遠程彈）
+      let target=null, bd=1e9;
+      for (const e of enemies){
+        if (e.isProj) continue;
+        const td=Math.hypot(e.x-player.x, e.y-player.y);
+        if (td<bd){ bd=td; target=e; }
+      }
+      if (!target) return;
+      dx=target.x-player.x; dy=target.y-player.y;
+      const dl=Math.hypot(dx,dy)||1; dx/=dl; dy/=dl;
+    }
+    const bs = 7 + upgrades.bulletSpeed*1.5;
+    const spreadN = upgrades.spread>0 ? (2 + upgrades.spread) : 1;
+    const baseAng = Math.atan2(dy, dx);
+    // 散彈成組共 roll 暴擊（避免散彈×暴擊爆炸）
+    const groupCrit = spreadN>1 ? (Math.random() < critChance()) : null;
+    for (let k=0; k<spreadN; k++){
+      let a = baseAng;
+      if (spreadN>1){ a = baseAng + (k-(spreadN-1)/2)*0.15; }
+      bullets.push({ x:player.x, y:player.y, dx:Math.cos(a), dy:Math.sin(a), r:3, life:70, pierce:upgrades.pierce, spd:bs, bounce:upgrades.bounce, crit:groupCrit });
+    }
+    sShoot();
+  }
+
+  function critChance(){ return 0.08 + upgrades.crit*0.06; }   // 基礎 8% 暴擊，每級 +6%（5 級 = 38%）
+  function doHitstop(ms){ hitstopUntil=Math.max(hitstopUntil, Date.now()+ms); }
+  function doSlowmo(ms){ slowmoUntil=Math.max(slowmoUntil, Date.now()+ms); }
+  function doShake(m){ shakeUntil=Date.now()+120; shakeMag=m; }
+  function doFlash(){ flashUntil=Date.now()+70; }
+
+  function addText(x,y,str,color,size){
+    texts.push({ x, y, str, color, size:size||16, life:60 });
+  }
+  function addParticles(x,y,color,n){
+    for(let i=0;i<n;i++) particles.push({ x, y, dx:(Math.random()-0.5)*6, dy:(Math.random()-0.5)*6, life:18+Math.random()*14, color, r:1+Math.random()*2.5 });
+  }
+
+  function loseHp(amt){
+    if (Date.now() < iframeUntil) return;   // i-frame 無敵
+    hp -= amt;
+    hpFill.style.width = Math.max(0, hp/player.maxHp*100)+'%';
+    hpText.textContent = Math.max(0,Math.round(hp))+'/'+player.maxHp;
+    iframeUntil = Date.now()+DIFF[diff].iframe;
+    doShake(6); doFlash(); sHurt();
+    if (diff==='hard') { combo=0; }
+    if (hp<=0){ hp=0; hpFill.style.width='0%'; hpText.textContent='0/'+player.maxHp; endGame(); }
+  }
+
+  function endGame(){
+    over=true; running=false; paused=false;
+    if (score>best){ best=score; lsSet('bulletrain_best',String(best)); bestVal.textContent=best; }
+    overlay.querySelector('h1').textContent='💀 陣亡';
+    overlay.querySelector('.sub').innerHTML='得分：'+score+'　最高：'+best+'　關卡：'+level;
+    startBtn.textContent='再嚟';
+    document.getElementById('endlessBtn').style.display='none';
+    overlay.classList.remove('hidden');
+    document.getElementById('diffSel').classList.remove('hidden');
+  }
+  function win(){
+    over=true; running=false; paused=false;
+    if (score>best){ best=score; lsSet('bulletrain_best',String(best)); bestVal.textContent=best; }
+    overlay.querySelector('h1').textContent='🏆 通關！';
+    overlay.querySelector('.sub').innerHTML='你過晒 5 關！得分：'+score+'　最高：'+best+'<br>可以繼續無盡挑戰刷分';
+    startBtn.textContent='再嚟';
+    document.getElementById('endlessBtn').style.display='block';
+    overlay.classList.remove('hidden');
+    document.getElementById('diffSel').classList.remove('hidden');
+  }
+
+  function dash(){
+    if (Date.now()<dashCd) return;
+    let dx=moveVec.x, dy=moveVec.y;
+    let l=Math.hypot(dx,dy);
+    if (l<0.1){
+      // 冇方向：向最近敵人反方向閃
+      let tx=0, ty=1, bd=1e9;
+      for (const e of enemies){
+        if (e.isProj) continue;
+        const td=Math.hypot(e.x-player.x, e.y-player.y);
+        if (td<bd){ bd=td; tx=player.x-e.x; ty=player.y-e.y; }
+      }
+      const tl=Math.hypot(tx,ty)||1; dx=tx/tl; dy=ty/tl; l=1;
+    }
+    dashVec={ x:dx/l, y:dy/l };
+    dashUntil=Date.now()+130;
+    dashCdDur=Math.max(400, 900 - upgrades.dashCd*100);
+    dashCd=Date.now()+dashCdDur;
+    iframeUntil=Math.max(iframeUntil, Date.now()+350);   // dash 無敵 350ms
+    dashBtn.classList.add('cd');
+  }
+
+  // ---------- 主循環 ----------
+  function loop(t){
+    requestAnimationFrame(loop);
+    let dt = t-lastT; lastT=t;
+    if (dt>50) dt=50;   // dt clamp，防瞬移
+    const now=Date.now();
+    if (now < dashCd){
+      dashBtn.classList.add('cd');
+      const pct = dashCdDur ? Math.max(0, Math.min(100, (1-(dashCd-now)/dashCdDur)*100)) : 0;
+      dashBtn.style.setProperty('--cd', pct.toFixed(0));
+    } else if (dashBtn.classList.contains('cd')){
+      dashBtn.classList.remove('cd');
+      dashBtn.style.setProperty('--cd', '0');
+    }
+    let sim=true;
+    if (now<hitstopUntil) sim=false;
+    else if (now<slowmoUntil) dt*=0.3;
+    else if (hp/player.maxHp < 0.25){
+      dt*=0.65;   // 低血慢鏡
+      if (!lowHpWarned){ lowHpWarned=true; addText(W/2, H*0.4, '⚠️ 危險！低血量', '#ef4444', 22); }
+    }
+
+    if (running && !over && !paused && sim){
+      const d=DIFF[diff];
+      const mv=Math.hypot(moveVec.x,moveVec.y);
+      let vx=0, vy=0;
+      if (now<dashUntil){ vx=dashVec.x*12; vy=dashVec.y*12; }
+      else if (mv>0.1){ vx=(moveVec.x/mv)*(3.2+upgrades.spd*0.3); vy=(moveVec.y/mv)*(3.2+upgrades.spd*0.3); }
+      player.x+=vx*(dt/16.7); player.y+=vy*(dt/16.7);
+      player.x=Math.max(player.r,Math.min(W-player.r,player.x));
+      player.y=Math.max(player.r,Math.min(H-player.r,player.y));
+
+      // 射擊（拖右搖桿瞄準，或開咗自動連射）
+      const aiming = (aimVec.x!==0 || aimVec.y!==0);
+      const baseIv = Math.max(60, 130 - upgrades.fireRate*12);
+      const iv = aiming ? baseIv : baseIv * 1.25;   // 手動瞄準滿速，自動連射慢 25%
+      if ((aiming || settings.autoFire) && Date.now()-lastShotAt > iv){
+        fire(); lastShotAt=Date.now();
+      }
+
+      // 完美閃避（dash 期間擦過敵人/子彈）
+      if (now < dashUntil && now > lastGrazeAt+200){
+        let grazed=false;
+        for (const e of enemies){
+          if (Math.hypot(e.x-player.x, e.y-player.y) < 26){ grazed=true; break; }
+        }
+        if (grazed){ lastGrazeAt=now; score+=5; addText(player.x, player.y-22, '完美閃避 +5', '#7dd3fc', 14); scoreVal.textContent=score; }
+      }
+
+      // 波次生成
+      if (waveEnemiesLeft>0){
+        spawnTimer+=dt;
+        if (spawnTimer > Math.max(220, 750-wave*70-level*40)/d.spawn){ spawnTimer=0; spawnEnemy(); }
+      } else if (enemies.length===0){
+        waveCleared(); sim=false;
+      }
+
+      // 子彈
+      for (let i=bullets.length-1;i>=0;i--){
+        const b=bullets[i];
+        b.x += b.dx*(b.spd||8)*(dt/16.7); b.y += b.dy*(b.spd||8)*(dt/16.7);
+        // 反彈
+        if (b.bounce>0){ if(b.x<0||b.x>W){b.dx=-b.dx;} if(b.y<0||b.y>H){b.dy=-b.dy;} }
+        b.life--;
+        let dead=b.life<=0||b.x<-20||b.x>W+20||b.y<-20||b.y>H+20;
+        if (!dead){
+          for (let j=enemies.length-1;j>=0;j--){
+            const e=enemies[j];
+            if (e.isProj) continue;   // 唔打遠程敵彈
+            const ddx=b.x-e.x, ddy=b.y-e.y;
+            if (ddx*ddx+ddy*ddy < e.r*e.r){
+              const crit = (b.crit!==null && b.crit!==undefined) ? b.crit : (Math.random() < critChance());   // 散彈用成組 roll，單彈即時 roll
+              if (crit){ e.hp -= (1 + upgrades.dmg) * 3; }   // 暴擊 = 3x 傷害
+              else { e.hp -= (1 + upgrades.dmg); }
+              if (e.hp<=0){
+                combo++; comboTimer=0;
+                score += 10*combo;
+                sKill();
+                if (crit){
+                  // 暴擊擊殺先出全套 juicy 反饋（慢鏡/hitstop/震屏/大字）
+                  doHitstop(40); doSlowmo(120); doShake(5); doFlash();
+                  sHeadshot();
+                  addParticles(e.x,e.y,e.headColor,16);
+                  addText(e.x,e.y,'暴擊 3x','#fbbf24',16);
+                } else {
+                  addParticles(e.x,e.y,e.color,10);
+                }
+                if (e.split){ for(let s=0;s<2;s++){ enemies.push({ x:e.x+(Math.random()-0.5)*20, y:e.y+(Math.random()-0.5)*20, r:10, headR:5, hp:1, speed:e.speed*1.1, type:'碎塊', color:'#c084fc', headColor:'#f0abfc', split:false, shoot:false }); } }
+                enemies.splice(j,1);
+              } else {
+                if (crit){ addText(e.x,e.y,'暴擊','#fbbf24',12); }   // 未殺敵只出細提示
+                beep(300,0.04,'square',0.04);
+                addParticles(b.x,b.y,'#94a3b8',3);
+              }
+              // 穿透：有 pierce 就保留子彈，扣一次
+              if (b.pierce > 0){ b.pierce--; }
+              else { bullets.splice(i,1); }
+              break;
+            }
+          }
+        }
+        if (dead && bullets.length>0 && bullets[i]) bullets.splice(i,1);
+      }
+
+      // 敵人移動/攻擊（倒序，方便 splice 撞完直接消失）
+      for (let i=enemies.length-1;i>=0;i--){
+        const e=enemies[i];
+        const dx=player.x-e.x, dy=player.y-e.y, dd=Math.hypot(dx,dy)||1;
+        if (e.isProj){
+          // 遠程彈：直飛，撞玩家扣血後消失（iframe 內穿過唔扣血唔刪）
+          e.x+=e.pdx*(dt/16.7); e.y+=e.pdy*(dt/16.7);
+          if (dd < e.r + player.r){ if (Date.now() >= iframeUntil){ loseHp(d.hpDmg); enemies.splice(i,1); } if (over) break; }
+          continue;
+        }
+        if (e.shoot){
+          // 遠程怪：保持距離（160~260 之間企定射）
+          let mx=0, my=0;
+          if (dd < 160){ mx=-dx/dd; my=-dy/dd; }
+          else if (dd > 260){ mx=dx/dd; my=dy/dd; }
+          e.x+=mx*e.speed*(dt/16.7); e.y+=my*e.speed*(dt/16.7);
+          e.shootCd-=dt;
+          if (e.shootCd<=0 && dd<320){ e.shootCd=1800; enemies.push({ x:e.x, y:e.y, r:6, headR:0, hp:999, speed:0, type:'彈', color:'#f87171', headColor:'#f87171', split:false, shoot:false, isProj:true, pdx:dx/dd*3.5, pdy:dy/dd*3.5 }); }
+        } else {
+          e.x+=(dx/dd)*e.speed*(dt/16.7); e.y+=(dy/dd)*e.speed*(dt/16.7);
+        }
+        if (dd < e.r + player.r){
+          if (Date.now() >= iframeUntil){ loseHp(d.hpDmg); enemies.splice(i,1); }   // iframe 內敵人穿過，唔扣血唔刪
+          if (over) break;
+        }
+      }
+      // 清走飛出畫面嘅遠程彈
+      enemies = enemies.filter(e => !(e.isProj && (e.x<-30||e.x>W+30||e.y<-30||e.y>H+30)));
+
+      // combo 衰減
+      if (combo>0){ comboTimer+=dt; if(comboTimer>3000){ combo=0; } }
+      comboVal.textContent = combo>0?('×'+combo):'×1';
+      scoreVal.textContent=score;
+
+      // 粒子/文字
+      for(let i=particles.length-1;i>=0;i--){ const p=particles[i]; p.x+=p.dx; p.y+=p.dy; p.life--; if(p.life<=0)particles.splice(i,1); }
+      for(let i=texts.length-1;i>=0;i--){ const t=texts[i]; t.y-=0.5; t.life--; if(t.life<=0)texts.splice(i,1); }
+    }
+    draw();
+  }
+
+  function draw(){
+    ctx.save();
+    if (Date.now()<shakeUntil) ctx.translate((Math.random()-0.5)*shakeMag,(Math.random()-0.5)*shakeMag);
+    ctx.clearRect(0,0,W,H);
+    // 網格
+    ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1;
+    for(let x=0;x<=W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<=H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+    // 粒子
+    for(const p of particles){ ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fill(); }
+    // 敵人
+    for(const e of enemies){
+      ctx.fillStyle=e.color; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,7); ctx.fill();
+      ctx.fillStyle=e.headColor;
+      ctx.beginPath(); ctx.arc(e.x, e.y-e.r*0.45, e.headR,0,7); ctx.fill();
+      ctx.fillStyle='#111';
+      ctx.beginPath(); ctx.arc(e.x-2, e.y-e.r*0.45-1, 1.6,0,7); ctx.fill();
+      ctx.beginPath(); ctx.arc(e.x+2, e.y-e.r*0.45-1, 1.6,0,7); ctx.fill();
+      // 坦克 hp 提示
+      if (e.type==='坦克'){ ctx.fillStyle='rgba(255,255,255,.7)'; ctx.font='10px sans-serif'; ctx.textAlign='center'; ctx.fillText(e.hp+'♥', e.x, e.y+e.r+12); }
+    }
+    // 子彈（拖尾）
+    for(const b of bullets){
+      const bc = b.bounce>0 ? 'rgba(34,211,238,.55)' : 'rgba(253,230,138,.5)';
+      const bf = b.bounce>0 ? '#22d3ee' : '#fde68a';
+      ctx.strokeStyle=bc; ctx.lineWidth=3; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(b.x-b.dx*10,b.y-b.dy*10); ctx.lineTo(b.x,b.y); ctx.stroke();
+      ctx.fillStyle=bf; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,7); ctx.fill();
+    }
+    // 玩家（dash 殘影 + 閃爍無敵）
+    const blink = (Date.now()<iframeUntil && !(Date.now()<dashUntil)) && (Math.floor(Date.now()/120)%2===0);
+    if (blink) ctx.globalAlpha=0.4;
+    ctx.fillStyle='#38bdf8'; ctx.beginPath(); ctx.arc(player.x,player.y,player.r,0,7); ctx.fill();
+    ctx.fillStyle='#0ea5e9'; ctx.beginPath(); ctx.arc(player.x,player.y,player.r*0.65,0,7); ctx.fill();
+    // 槍口指向（右搖桿瞄準 or 最近敵人）
+    let aimAng=null;
+    if (aimVec.x!==0||aimVec.y!==0){
+      aimAng = Math.atan2(aimVec.y, aimVec.x);
+    } else {
+      let tgt=null, tbd=1e9;
+      for (const e of enemies){ if(e.isProj) continue; const td=Math.hypot(e.x-player.x,e.y-player.y); if(td<tbd){tbd=td;tgt=e;} }
+      if (tgt) aimAng = Math.atan2(tgt.y-player.y, tgt.x-player.x);
+    }
+    if (aimAng!==null){ ctx.strokeStyle='#fde68a'; ctx.lineWidth=4; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(player.x,player.y); ctx.lineTo(player.x+Math.cos(aimAng)*22,player.y+Math.sin(aimAng)*22); ctx.stroke(); }
+    ctx.globalAlpha=1;
+    // 漂浮文字
+    for(const t of texts){ ctx.fillStyle=t.color; ctx.font='bold '+t.size+'px sans-serif'; ctx.textAlign='center'; ctx.globalAlpha=Math.min(1,t.life/20); ctx.fillText(t.str,t.x,t.y); ctx.globalAlpha=1; }
+    // 屏幕閃光
+    if (Date.now()<flashUntil){ ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(0,0,W,H); }
+    // 低血紅光
+    if (running && hp/player.maxHp < 0.25){ ctx.fillStyle='rgba(239,68,68,0.10)'; ctx.fillRect(0,0,W,H); }
+    ctx.restore();
+  }
+
+  // ---------- 搖桿 ----------
+  function joySetup(base,knob,onMove){
+    const R=42; let pid=null,ox=0,oy=0;
+    base.addEventListener('pointerdown',function(e){ if(pid!==null)return; pid=e.pointerId; try{base.setPointerCapture(pid);}catch(err){} const r=base.getBoundingClientRect(); ox=r.left+r.width/2; oy=r.top+r.height/2; onMove(0,0); e.preventDefault(); });
+    base.addEventListener('pointermove',function(e){ if(e.pointerId!==pid)return; let dx=e.clientX-ox,dy=e.clientY-oy; const dd=Math.hypot(dx,dy),mx=R; if(dd>mx){dx=dx/dd*mx;dy=dy/dd*mx;} knob.style.transform='translate('+dx+'px,'+dy+'px)'; onMove(dx/mx,dy/mx); e.preventDefault(); });
+    function end(e){ if(e.pointerId!==pid)return; pid=null; knob.style.transform='translate(0,0)'; onMove(0,0); }
+    base.addEventListener('pointerup',end); base.addEventListener('pointercancel',end);
+  }
+  joySetup(joyL,knobL,function(x,y){ moveVec.x=x; moveVec.y=y; });
+  joySetup(joyR,knobR,function(x,y){ aimVec.x=x; aimVec.y=y; });
+
+  dashBtn.addEventListener('pointerdown',function(e){ e.preventDefault(); dash(); });
+
+  // 暫停
+  let lastToggleAt=0;
+  function togglePause(){
+    const now=Date.now();
+    if (now-lastToggleAt<300) return;
+    lastToggleAt=now;
+    if (over) return;
+    if (!upg.classList.contains('hidden')) return;  // 升級畫面唔暫停
+    paused = !paused;
+    if (paused){
+      document.getElementById('diffSel').classList.add('hidden');
+      overlay.querySelector('h1').textContent='⏸ 暫停';
+      overlay.querySelector('.sub').innerHTML='得分：'+score+'　關卡：'+level+'　波：'+wave;
+      startBtn.textContent='繼續';
+      overlay.classList.remove('hidden');
+    } else {
+      overlay.classList.add('hidden');
+      lastT = performance.now();
+    }
+  }
+  pauseBtn.addEventListener('pointerdown',function(e){ e.preventDefault(); togglePause(); });
+
+  // 設定 menu
+  const gearBtn = document.getElementById('gearBtn');
+  const settingsPanel = document.getElementById('settings');
+  const closeSettings = document.getElementById('closeSettings');
+  const tglSound = document.getElementById('tglSound');
+  const tglAutoFire = document.getElementById('tglAutoFire');
+  function syncToggles(){
+    tglSound.textContent = settings.sound ? '開' : '關';
+    tglSound.classList.toggle('on', settings.sound);
+    tglAutoFire.textContent = settings.autoFire ? '開' : '關';
+    tglAutoFire.classList.toggle('on', settings.autoFire);
+    layoutControls(window.innerWidth > window.innerHeight);
+  }
+  syncToggles();
+  gearBtn.addEventListener('pointerdown',function(e){ e.preventDefault(); settingsPanel.classList.remove('hidden'); });
+  document.getElementById('tutorBtn').addEventListener('pointerdown',function(e){ e.preventDefault(); if (!running || over){ startGame(); } showTutorial(); });
+  closeSettings.addEventListener('pointerdown',function(e){ e.preventDefault(); settingsPanel.classList.add('hidden'); });
+  tglSound.addEventListener('pointerdown',function(e){ e.preventDefault(); settings.sound=!settings.sound; saveSettings(); syncToggles(); });
+  tglAutoFire.addEventListener('pointerdown',function(e){ e.preventDefault(); settings.autoFire=!settings.autoFire; saveSettings(); syncToggles(); });
+
+  // 難度選擇
+  document.querySelectorAll('#diffSel .dbtn').forEach(function(b){
+    b.addEventListener('pointerdown',function(e){ e.preventDefault(); diff=b.getAttribute('data-d'); document.querySelectorAll('#diffSel .dbtn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); });
+  });
+
+  let lastStartAt=0;
+  function safeStart(){
+    const now=Date.now();
+    if (now-lastStartAt<300) return;
+    lastStartAt=now;
+    if(paused){ togglePause(); } else { startGame(); }
+  }
+  startBtn.addEventListener('pointerdown',function(e){ e.preventDefault(); safeStart(); });
+  startBtn.addEventListener('click',function(e){ e.preventDefault(); safeStart(); });
+
+  // 繼續無盡
+  function continueEndless(){
+    document.getElementById('endlessBtn').style.display='none';
+    document.getElementById('diffSel').classList.add('hidden');
+    overlay.classList.add('hidden');
+    over=false; running=true; paused=false; endless=true;
+    startWave();
+    lastT=performance.now();
+  }
+  document.getElementById('endlessBtn').addEventListener('pointerdown', function(e){ e.preventDefault(); continueEndless(); });
+
+  // 初始
+  resetGame();
+  draw();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
