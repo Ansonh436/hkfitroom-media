@@ -39,7 +39,7 @@
   .dashbtn.cd { opacity:.55; }
   .knob { position:absolute; width:48px; height:48px; border-radius:50%; background:rgba(255,255,255,.22); left:36px; top:36px; pointer-events:none; }
   .dashbtn { position:absolute; right:16px; bottom:115px; width:56px; height:56px; border-radius:50%; background: conic-gradient(#38bdf8 calc(var(--cd,0)*1%), rgba(56,189,248,.15) 0); border:1.5px solid rgba(56,189,248,.5); color:#7dd3fc; font-size:12px; font-weight:800; z-index:6; touch-action:none; pointer-events:auto; display:flex; align-items:center; justify-content:center; }
-  .dashbtn:active { background:rgba(56,189,248,.35); }
+  .dashbtn:active { transform:scale(.92); }
   .overlay { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center; background:rgba(8,10,16,.94); padding:20px; }
   .overlay h1 { font-size:28px; letter-spacing:2px; }
   .overlay .sub { color:var(--muted); font-size:13px; line-height:1.7; }
@@ -154,7 +154,6 @@
     fitViewport();
     layoutControls(isLand);
   }
-  applyOrientation();
   window.addEventListener('resize', function(){ if (!orientationLocked){ applyOrientation(); } else { fitViewport(); } });
   window.addEventListener('orientationchange', function(){ setTimeout(function(){ if (!orientationLocked){ applyOrientation(); } else { fitViewport(); } }, 200); });
 
@@ -165,6 +164,7 @@
   let settings = { sound:true, autoFire:true };
   function saveSettings(){ try { localStorage.setItem('bulletrain_settings', JSON.stringify(settings)); } catch(e){} }
   (function(){ try { const s=JSON.parse(localStorage.getItem('bulletrain_settings')||'{}'); settings=Object.assign(settings,s); } catch(e){} })();
+  applyOrientation();
   function lsNum(k){ const v=lsGet(k); return v?parseInt(v,10)||0:0; }
   let best = lsNum('bulletrain_best'); bestVal.textContent = best;
 
@@ -224,7 +224,7 @@
       {t:400,  s:'🕹 左搖桿移動'},
       {t:2200, s:(settings.autoFire ? '🔫 自動射擊已開，專心移動' : '🎯 右搖桿瞄準開火')},
       {t:4000, s:'💨 DASH 閃避'},
-      {t:5800, s:'💥 暴擊：每槍 8% 機率 3 倍傷害'},
+      {t:5800, s:'💥 暴擊：每槍 8% 機率 3x 傷害'},
     ];
     tuts.forEach(function(t){ setTimeout(function(){ if(running && !over) addText(W/2, H*0.45, t.s, '#fbbf24', 18); }, t.t); });
   }
@@ -244,6 +244,7 @@
   function startWave(){
     firstWave = (level===1 && wave===1);
     waveEnemiesLeft = firstWave ? 3 : (3 + wave*2 + level*2);
+    if (level===1 && wave===2) waveEnemiesLeft = 5;   // 第二波平滑過渡
     spawnTimer=0;
     sWave();
     addText(W/2, H*0.35, '第 '+level+' 關 · 第 '+wave+' 波', '#38bdf8', 28);
@@ -302,8 +303,9 @@
     ];
     let pool = all.filter(o => (upgrades[o.k]||0) < (o.max||99));
     if (pool.length===0){ pool = [ {n:'傷害 +', d:'子彈傷害提升', k:'dmg'}, {n:'射速 +', d:'射擊間隔縮短', k:'fireRate'}, {n:'移速 +', d:'移動更快', k:'spd'} ]; }
+    const want = Math.min(3, pool.length);
     const idx = [Math.floor(Math.random()*pool.length)];
-    while (idx.length<3 && pool.length>1){ const r=Math.floor(Math.random()*pool.length); if(idx.indexOf(r)<0) idx.push(r); }
+    while (idx.length < want){ const r=Math.floor(Math.random()*pool.length); if(idx.indexOf(r)<0) idx.push(r); }
     return idx.map(i=>pool[i]);
   }
   function applyUpgrade(o){
@@ -368,8 +370,9 @@
   }
 
   function critChance(){ return 0.08 + upgrades.crit*0.06; }   // 基礎 8% 暴擊，每級 +6%（5 級 = 38%）
+  let lastSlowmoAt=0;
   function doHitstop(ms){ hitstopUntil=Math.max(hitstopUntil, Date.now()+ms); }
-  function doSlowmo(ms){ slowmoUntil=Math.max(slowmoUntil, Date.now()+ms); }
+  function doSlowmo(ms){ if (Date.now()-lastSlowmoAt < 350) return; lastSlowmoAt=Date.now(); slowmoUntil=Math.max(slowmoUntil, Date.now()+ms); }
   function doShake(m){ shakeUntil=Date.now()+120; shakeMag=m; }
   function doFlash(){ flashUntil=Date.now()+70; }
 
@@ -428,7 +431,7 @@
     }
     dashVec={ x:dx/l, y:dy/l };
     dashUntil=Date.now()+130;
-    dashCdDur=Math.max(400, 900 - upgrades.dashCd*100);
+    dashCdDur=Math.max(350, 750 - upgrades.dashCd*100);
     dashCd=Date.now()+dashCdDur;
     iframeUntil=Math.max(iframeUntil, Date.now()+350);   // dash 無敵 350ms
     dashBtn.classList.add('cd');
@@ -446,7 +449,7 @@
       dashBtn.style.setProperty('--cd', pct.toFixed(0));
     } else if (dashBtn.classList.contains('cd')){
       dashBtn.classList.remove('cd');
-      dashBtn.style.setProperty('--cd', '0');
+      dashBtn.style.setProperty('--cd', '100');
     }
     let sim=true;
     if (now<hitstopUntil) sim=false;
@@ -454,7 +457,7 @@
     else if (hp/player.maxHp < 0.25){
       dt*=0.65;   // 低血慢鏡
       if (!lowHpWarned){ lowHpWarned=true; addText(W/2, H*0.4, '⚠️ 危險！低血量', '#ef4444', 22); }
-    }
+    } else { lowHpWarned=false; }
 
     if (running && !over && !paused && sim){
       const d=DIFF[diff];
@@ -469,7 +472,7 @@
       // 射擊（拖右搖桿瞄準，或開咗自動連射）
       const aiming = (aimVec.x!==0 || aimVec.y!==0);
       const baseIv = Math.max(60, 130 - upgrades.fireRate*12);
-      const iv = aiming ? baseIv : baseIv * 1.25;   // 手動瞄準滿速，自動連射慢 25%
+      const iv = aiming ? baseIv : baseIv * 1.4;   // 手動瞄準滿速，自動連射慢 40%
       if ((aiming || settings.autoFire) && Date.now()-lastShotAt > iv){
         fire(); lastShotAt=Date.now();
       }
@@ -514,7 +517,7 @@
                 sKill();
                 if (crit){
                   // 暴擊擊殺先出全套 juicy 反饋（慢鏡/hitstop/震屏/大字）
-                  doHitstop(40); doSlowmo(120); doShake(5); doFlash();
+                  doHitstop(25); doSlowmo(120); doShake(5); doFlash();
                   sHeadshot();
                   addParticles(e.x,e.y,e.headColor,16);
                   addText(e.x,e.y,'暴擊 3x','#fbbf24',16);
@@ -524,7 +527,7 @@
                 if (e.split){ for(let s=0;s<2;s++){ enemies.push({ x:e.x+(Math.random()-0.5)*20, y:e.y+(Math.random()-0.5)*20, r:10, headR:5, hp:1, speed:e.speed*1.1, type:'碎塊', color:'#c084fc', headColor:'#f0abfc', split:false, shoot:false }); } }
                 enemies.splice(j,1);
               } else {
-                if (crit){ addText(e.x,e.y,'暴擊','#fbbf24',12); }   // 未殺敵只出細提示
+                if (crit){ addText(e.x,e.y,'暴擊','#fbbf24',12); beep(980,0.06,'sine',0.06); }   // 未殺敵暴擊：細叮
                 beep(300,0.04,'square',0.04);
                 addParticles(b.x,b.y,'#94a3b8',3);
               }
@@ -683,7 +686,7 @@
   }
   syncToggles();
   gearBtn.addEventListener('pointerdown',function(e){ e.preventDefault(); settingsPanel.classList.remove('hidden'); });
-  document.getElementById('tutorBtn').addEventListener('pointerdown',function(e){ e.preventDefault(); if (!running || over){ startGame(); } showTutorial(); });
+  document.getElementById('tutorBtn').addEventListener('pointerdown',function(e){ e.preventDefault(); lsSet('bulletrain_tutored','1'); if (!running || over){ startGame(); } showTutorial(); });
   closeSettings.addEventListener('pointerdown',function(e){ e.preventDefault(); settingsPanel.classList.add('hidden'); });
   tglSound.addEventListener('pointerdown',function(e){ e.preventDefault(); settings.sound=!settings.sound; saveSettings(); syncToggles(); });
   tglAutoFire.addEventListener('pointerdown',function(e){ e.preventDefault(); settings.autoFire=!settings.autoFire; saveSettings(); syncToggles(); });
@@ -716,6 +719,7 @@
 
   // 初始
   resetGame();
+  dashBtn.style.setProperty('--cd','100');
   draw();
   requestAnimationFrame(loop);
 })();
